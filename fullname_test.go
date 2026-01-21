@@ -19,9 +19,9 @@ func TestFullName(t *testing.T) {
 		{"pkg:npm/%40babel/core@7.24.0", "@babel/core"},
 		{"pkg:npm/%40types/node@18.0.0", "@types/node"},
 
-		// Maven with groupId (uses / like others)
-		{"pkg:maven/org.apache.commons/commons-lang3@3.12.0", "org.apache.commons/commons-lang3"},
-		{"pkg:maven/junit/junit@4.13.2", "junit/junit"},
+		// Maven with groupId (uses : separator)
+		{"pkg:maven/org.apache.commons/commons-lang3@3.12.0", "org.apache.commons:commons-lang3"},
+		{"pkg:maven/junit/junit@4.13.2", "junit:junit"},
 
 		// Go modules
 		{"pkg:golang/github.com/gorilla/mux@v1.8.0", "github.com/gorilla/mux"},
