@@ -7,10 +7,11 @@ import (
 // purlTypeForEcosystem maps ecosystem names to PURL types.
 // Most ecosystems use their name as the PURL type, but some differ.
 var purlTypeForEcosystem = map[string]string{
-	"alpine":    "apk",
-	"arch":      "alpm",
-	"rubygems":  "gem",
-	"packagist": "composer",
+	"alpine":         "apk",
+	"arch":           "alpm",
+	"rubygems":       "gem",
+	"packagist":      "composer",
+	"github-actions": "githubactions",
 }
 
 // ecosystemAliases maps alternate names to canonical ecosystem names.
@@ -22,17 +23,18 @@ var ecosystemAliases = map[string]string{
 
 // osvEcosystemNames maps PURL types to OSV ecosystem names.
 var osvEcosystemNames = map[string]string{
-	"gem":       "RubyGems",
-	"npm":       "npm",
-	"pypi":      "PyPI",
-	"cargo":     "crates.io",
-	"golang":    "Go",
-	"maven":     "Maven",
-	"nuget":     "NuGet",
-	"composer":  "Packagist",
-	"hex":       "Hex",
-	"pub":       "Pub",
-	"cocoapods": "CocoaPods",
+	"gem":           "RubyGems",
+	"npm":           "npm",
+	"pypi":          "PyPI",
+	"cargo":         "crates.io",
+	"golang":        "Go",
+	"maven":         "Maven",
+	"nuget":         "NuGet",
+	"composer":      "Packagist",
+	"hex":           "Hex",
+	"pub":           "Pub",
+	"cocoapods":     "CocoaPods",
+	"githubactions": "GitHub Actions",
 }
 
 // defaultNamespaces defines default namespaces for certain ecosystems.
@@ -126,6 +128,13 @@ func MakePURL(ecosystem, name, version string) *PURL {
 	case "packagist", "composer":
 		if strings.Contains(name, "/") {
 			parts := strings.SplitN(name, "/", 2)
+			namespace = parts[0]
+			pkgName = parts[1]
+		}
+	case "github-actions":
+		// GitHub Actions: owner/repo or owner/repo/path -> namespace=owner, name=repo (path ignored)
+		if strings.Contains(name, "/") {
+			parts := strings.SplitN(name, "/", 3)
 			namespace = parts[0]
 			pkgName = parts[1]
 		}

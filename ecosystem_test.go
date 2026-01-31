@@ -42,9 +42,10 @@ func TestEcosystemToPURLType(t *testing.T) {
 		{"rubygems", "gem"},
 		{"packagist", "composer"},
 		{"cargo", "cargo"},
-		{"go", "golang"},      // alias normalized first
-		{"gem", "gem"},        // alias to rubygems, then rubygems -> gem
-		{"composer", "composer"}, // alias to packagist, then packagist -> composer
+		{"go", "golang"},           // alias normalized first
+		{"gem", "gem"},             // alias to rubygems, then rubygems -> gem
+		{"composer", "composer"},   // alias to packagist, then packagist -> composer
+		{"github-actions", "githubactions"},
 		{"unknown", "unknown"},
 	}
 
@@ -66,6 +67,7 @@ func TestPURLTypeToEcosystem(t *testing.T) {
 		{"alpm", "arch"},
 		{"gem", "rubygems"},
 		{"composer", "packagist"},
+		{"githubactions", "github-actions"},
 		{"npm", "npm"},     // no reverse mapping, returns as-is
 		{"cargo", "cargo"}, // no reverse mapping, returns as-is
 	}
@@ -98,6 +100,7 @@ func TestEcosystemToOSV(t *testing.T) {
 		{"hex", "Hex"},
 		{"pub", "Pub"},
 		{"cocoapods", "CocoaPods"},
+		{"github-actions", "GitHub Actions"},
 		{"unknown", "unknown"}, // falls through
 	}
 
@@ -197,6 +200,22 @@ func TestMakePURL(t *testing.T) {
 			pkg:       "github.com/user/repo",
 			version:   "v1.0.0",
 			wantStr:   "pkg:golang/github.com/user/repo@v1.0.0",
+		},
+		// github-actions
+		{
+			name:      "github-actions",
+			ecosystem: "github-actions",
+			pkg:       "actions/checkout",
+			version:   "v4",
+			wantStr:   "pkg:githubactions/actions/checkout@v4",
+		},
+		// github-actions with path
+		{
+			name:      "github-actions with path",
+			ecosystem: "github-actions",
+			pkg:       "actions/cache/restore",
+			version:   "v3",
+			wantStr:   "pkg:githubactions/actions/cache@v3",
 		},
 	}
 
