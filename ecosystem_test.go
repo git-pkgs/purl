@@ -113,6 +113,31 @@ func TestEcosystemToOSV(t *testing.T) {
 	}
 }
 
+func TestPURLTypeToDepsdev(t *testing.T) {
+	tests := []struct {
+		purlType string
+		want     string
+	}{
+		{"npm", "NPM"},
+		{"gem", "RUBYGEMS"},
+		{"pypi", "PYPI"},
+		{"cargo", "CARGO"},
+		{"golang", "GO"},
+		{"maven", "MAVEN"},
+		{"nuget", "NUGET"},
+		{"unknown", ""},
+		{"hex", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.purlType, func(t *testing.T) {
+			if got := PURLTypeToDepsdev(tt.purlType); got != tt.want {
+				t.Errorf("PURLTypeToDepsdev(%q) = %q, want %q", tt.purlType, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMakePURL(t *testing.T) {
 	tests := []struct {
 		name      string

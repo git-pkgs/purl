@@ -37,6 +37,17 @@ var osvEcosystemNames = map[string]string{
 	"githubactions": "GitHub Actions",
 }
 
+// depsdevSystemNames maps PURL types to deps.dev system names.
+var depsdevSystemNames = map[string]string{
+	"npm":    "NPM",
+	"gem":    "RUBYGEMS",
+	"pypi":   "PYPI",
+	"cargo":  "CARGO",
+	"golang": "GO",
+	"maven":  "MAVEN",
+	"nuget":  "NUGET",
+}
+
 // defaultNamespaces defines default namespaces for certain ecosystems.
 var defaultNamespaces = map[string]string{
 	"alpine": "alpine",
@@ -83,6 +94,15 @@ func EcosystemToOSV(ecosystem string) string {
 		return osv
 	}
 	return ecosystem
+}
+
+// PURLTypeToDepsdev converts a PURL type to the deps.dev system name.
+// Returns empty string if the type is not supported by deps.dev.
+func PURLTypeToDepsdev(purlType string) string {
+	if system, ok := depsdevSystemNames[purlType]; ok {
+		return system
+	}
+	return ""
 }
 
 // MakePURL constructs a PURL from ecosystem-native package identifiers.
