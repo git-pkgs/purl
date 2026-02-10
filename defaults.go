@@ -1,7 +1,6 @@
 package purl
 
 import (
-	"net/url"
 	"strings"
 )
 
@@ -40,11 +39,22 @@ func IsNonDefaultRegistry(purlType, registryURL string) bool {
 	return !IsDefaultRegistry(purlType, registryURL)
 }
 
-// extractHost parses a URL and returns its host.
+// extractHost extracts the host from a URL string without using net/url.Parse.
 func extractHost(rawURL string) string {
-	parsed, err := url.Parse(rawURL)
-	if err != nil {
-		return ""
+	s := rawURL
+	// Strip scheme
+	if i := strings.Index(s, "://"); i >= 0 {
+		s = s[i+3:]
 	}
-	return parsed.Host
+	// Strip userinfo
+	if i := strings.Index(s, "@"); i >= 0 {
+		s = s[i+1:]
+	}
+	// Strip path, query, fragment
+	for _, sep := range []byte{'/', '?', '#'} {
+		if i := strings.IndexByte(s, sep); i >= 0 {
+			s = s[:i]
+		}
+	}
+	return s
 }
