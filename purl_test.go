@@ -122,7 +122,7 @@ func TestNew(t *testing.T) {
 			purlType:   "npm",
 			pkgName:    "lodash",
 			qualifiers: map[string]string{"repository_url": "https://npm.example.com"},
-			want:       "pkg:npm/lodash?repository_url=https%3A%2F%2Fnpm.example.com",
+			want:       "pkg:npm/lodash?repository_url=https:%2F%2Fnpm.example.com",
 		},
 	}
 

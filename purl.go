@@ -1,6 +1,6 @@
 // Package purl provides utilities for working with Package URLs (PURLs).
 //
-// It wraps github.com/package-url/packageurl-go with additional helpers
+// It wraps github.com/git-pkgs/packageurl-go with additional helpers
 // for ecosystem-specific name formatting, registry URL generation, and
 // PURL construction from ecosystem-native package identifiers.
 package purl
@@ -8,7 +8,7 @@ package purl
 import (
 	"sort"
 
-	packageurl "github.com/package-url/packageurl-go"
+	packageurl "github.com/git-pkgs/packageurl-go"
 )
 
 // PURL wraps packageurl.PackageURL with additional helpers.
