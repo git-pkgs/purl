@@ -55,7 +55,7 @@ func TestBuildPURLString(t *testing.T) {
 		want        string
 	}{
 		{"simple npm", "npm", "lodash", "4.17.21", "", "pkg:npm/lodash@4.17.21"},
-		{"scoped npm", "npm", "@babel/core", "7.20.0", "", "pkg:npm/%40babel/core@7.20.0"},  // @ encoded in namespace
+		{"scoped npm", "npm", "@babel/core", "7.20.0", "", "pkg:npm/%40babel/core@7.20.0"}, // @ encoded in namespace
 		{"gem", "rubygems", "rails", "7.0.0", "", "pkg:gem/rails@7.0.0"},
 		{"pypi", "pypi", "requests", "2.28.0", "", "pkg:pypi/requests@2.28.0"},
 		{"maven", "maven", "org.apache:commons", "1.0", "", "pkg:maven/org.apache/commons@1.0"},
@@ -112,4 +112,3 @@ func TestBuildPURLStringMatchesMakePURL(t *testing.T) {
 		})
 	}
 }
-

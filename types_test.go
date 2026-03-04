@@ -102,8 +102,8 @@ func TestDefaultRegistry(t *testing.T) {
 		{"npm", "https://registry.npmjs.org"},
 		{"pypi", "https://pypi.org"},
 		{"cargo", "https://crates.io"},
-		{"apk", ""},  // no default registry
-		{"deb", ""},  // no default registry
+		{"apk", ""}, // no default registry
+		{"deb", ""}, // no default registry
 		{"unknown", ""},
 	}
 
@@ -118,15 +118,15 @@ func TestDefaultRegistry(t *testing.T) {
 
 func TestNamespaceRequirement(t *testing.T) {
 	tests := []struct {
-		purlType         string
-		wantRequired     bool
-		wantProhibited   bool
+		purlType       string
+		wantRequired   bool
+		wantProhibited bool
 	}{
 		{"maven", true, false},
 		{"composer", true, false},
 		{"gem", false, true},
 		{"cran", false, true},
-		{"npm", false, false},  // optional
+		{"npm", false, false},   // optional
 		{"cargo", false, false}, // no requirement
 	}
 

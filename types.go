@@ -21,13 +21,13 @@ type TypeConfig struct {
 
 // RegistryConfig contains URL templates and patterns for registry URLs.
 type RegistryConfig struct {
-	BaseURL                         string              `json:"base_url"`
-	ReverseRegex                    string              `json:"reverse_regex"`
-	URITemplate                     string              `json:"uri_template"`
-	URITemplateNoNamespace          string              `json:"uri_template_no_namespace"`
-	URITemplateWithVersion          string              `json:"uri_template_with_version"`
-	URITemplateWithVersionNoNS      string              `json:"uri_template_with_version_no_namespace"`
-	Components                      RegistryComponents  `json:"components"`
+	BaseURL                    string             `json:"base_url"`
+	ReverseRegex               string             `json:"reverse_regex"`
+	URITemplate                string             `json:"uri_template"`
+	URITemplateNoNamespace     string             `json:"uri_template_no_namespace"`
+	URITemplateWithVersion     string             `json:"uri_template_with_version"`
+	URITemplateWithVersionNoNS string             `json:"uri_template_with_version_no_namespace"`
+	Components                 RegistryComponents `json:"components"`
 }
 
 // RegistryComponents describes which PURL components are used in registry URLs.

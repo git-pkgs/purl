@@ -16,9 +16,9 @@ var purlTypeForEcosystem = map[string]string{
 
 // ecosystemAliases maps alternate names to canonical ecosystem names.
 var ecosystemAliases = map[string]string{
-	"go":        "golang",
-	"gem":       "rubygems",
-	"composer":  "packagist",
+	"go":       "golang",
+	"gem":      "rubygems",
+	"composer": "packagist",
 }
 
 // osvEcosystemNames maps PURL types to OSV ecosystem names.
