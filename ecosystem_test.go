@@ -42,9 +42,9 @@ func TestEcosystemToPURLType(t *testing.T) {
 		{"rubygems", "gem"},
 		{"packagist", "composer"},
 		{"cargo", "cargo"},
-		{"go", "golang"},           // alias normalized first
-		{"gem", "gem"},             // alias to rubygems, then rubygems -> gem
-		{"composer", "composer"},   // alias to packagist, then packagist -> composer
+		{"go", "golang"},         // alias normalized first
+		{"gem", "gem"},           // alias to rubygems, then rubygems -> gem
+		{"composer", "composer"}, // alias to packagist, then packagist -> composer
 		{"github-actions", "githubactions"},
 		{"unknown", "unknown"},
 	}

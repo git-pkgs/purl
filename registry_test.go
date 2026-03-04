@@ -134,10 +134,10 @@ func TestRegistryURLWithVersion(t *testing.T) {
 
 func TestParseRegistryURLWithType(t *testing.T) {
 	tests := []struct {
-		url       string
-		purlType  string
-		wantPURL  string
-		wantErr   bool
+		url      string
+		purlType string
+		wantPURL string
+		wantErr  bool
 	}{
 		// npm
 		{"https://www.npmjs.com/package/lodash", "npm", "pkg:npm/lodash", false},
