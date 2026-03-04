@@ -24,20 +24,19 @@ func TestTypeInfo(t *testing.T) {
 				if cfg != nil {
 					t.Errorf("TypeInfo(%q) = %v, want nil", tt.purlType, cfg)
 				}
-				return
-			}
-			if cfg == nil {
-				t.Fatalf("TypeInfo(%q) = nil, want non-nil", tt.purlType)
-			}
-			if cfg.Description != tt.wantDescription {
-				t.Errorf("Description = %q, want %q", cfg.Description, tt.wantDescription)
-			}
-			if cfg.DefaultRegistry == nil {
-				if tt.wantRegistry != "" {
-					t.Errorf("DefaultRegistry = nil, want %q", tt.wantRegistry)
+			} else if cfg == nil {
+				t.Errorf("TypeInfo(%q) = nil, want non-nil", tt.purlType)
+			} else {
+				if cfg.Description != tt.wantDescription {
+					t.Errorf("Description = %q, want %q", cfg.Description, tt.wantDescription)
 				}
-			} else if *cfg.DefaultRegistry != tt.wantRegistry {
-				t.Errorf("DefaultRegistry = %q, want %q", *cfg.DefaultRegistry, tt.wantRegistry)
+				if cfg.DefaultRegistry == nil {
+					if tt.wantRegistry != "" {
+						t.Errorf("DefaultRegistry = nil, want %q", tt.wantRegistry)
+					}
+				} else if *cfg.DefaultRegistry != tt.wantRegistry {
+					t.Errorf("DefaultRegistry = %q, want %q", *cfg.DefaultRegistry, tt.wantRegistry)
+				}
 			}
 		})
 	}
