@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+const ecosystemMaven = "maven"
+
 // purlTypeForEcosystem maps ecosystem names to PURL types.
 // Most ecosystems use their name as the PURL type, but some differ.
 var purlTypeForEcosystem = map[string]string{
@@ -28,7 +30,7 @@ var osvEcosystemNames = map[string]string{
 	"pypi":          "PyPI",
 	"cargo":         "crates.io",
 	"golang":        "Go",
-	"maven":         "Maven",
+	ecosystemMaven:  "Maven",
 	"nuget":         "NuGet",
 	"composer":      "Packagist",
 	"hex":           "Hex",
@@ -39,13 +41,13 @@ var osvEcosystemNames = map[string]string{
 
 // depsdevSystemNames maps PURL types to deps.dev system names.
 var depsdevSystemNames = map[string]string{
-	"npm":    "NPM",
-	"gem":    "RUBYGEMS",
-	"pypi":   "PYPI",
-	"cargo":  "CARGO",
-	"golang": "GO",
-	"maven":  "MAVEN",
-	"nuget":  "NUGET",
+	"npm":          "NPM",
+	"gem":          "RUBYGEMS",
+	"pypi":         "PYPI",
+	"cargo":        "CARGO",
+	"golang":       "GO",
+	ecosystemMaven: "MAVEN",
+	"nuget":        "NUGET",
 }
 
 // defaultNamespaces defines default namespaces for certain ecosystems.
@@ -128,8 +130,8 @@ func MakePURL(ecosystem, name, version string) *PURL {
 	switch NormalizeEcosystem(ecosystem) {
 	case "npm":
 		if strings.HasPrefix(name, "@") {
-			parts := strings.SplitN(name, "/", 2)
-			if len(parts) == 2 {
+			parts := strings.SplitN(name, "/", 2) //nolint:mnd
+			if len(parts) == 2 {                  //nolint:mnd
 				namespace = parts[0] // Keep the @ for packageurl-go
 				pkgName = parts[1]
 			}
@@ -139,22 +141,22 @@ func MakePURL(ecosystem, name, version string) *PURL {
 			namespace = name[:idx]
 			pkgName = name[idx+1:]
 		}
-	case "maven":
+	case ecosystemMaven:
 		if strings.Contains(name, ":") {
-			parts := strings.SplitN(name, ":", 2)
+			parts := strings.SplitN(name, ":", 2) //nolint:mnd
 			namespace = parts[0]
 			pkgName = parts[1]
 		}
 	case "packagist", "composer":
 		if strings.Contains(name, "/") {
-			parts := strings.SplitN(name, "/", 2)
+			parts := strings.SplitN(name, "/", 2) //nolint:mnd
 			namespace = parts[0]
 			pkgName = parts[1]
 		}
 	case "github-actions":
 		// GitHub Actions: owner/repo or owner/repo/path -> namespace=owner, name=repo (path ignored)
 		if strings.Contains(name, "/") {
-			parts := strings.SplitN(name, "/", 3)
+			parts := strings.SplitN(name, "/", 3) //nolint:mnd
 			namespace = parts[0]
 			pkgName = parts[1]
 		}
