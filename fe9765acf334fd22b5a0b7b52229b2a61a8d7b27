@@ -1,0 +1,29 @@
+registry.go
+  b2716cb014d5880c 53-54,56,58,64-65,67,69,134,137,142,146,155
+ecosystem.go
+  b2716cb014d5880c 7-8,33,49,133-134,144,146,152,159
+types_test.go
+  b2716cb014d5880c 23-24,28,30
+makepurl.go
+  b2716cb014d5880c 49,141-142,166-167,178,181
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "fe9765acf334fd22b5a0b7b52229b2a61a8d7b27",
+  "prompts": {
+    "b2716cb014d5880c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ca39a81-e15e-4f0b-8ee7-3a7370c4e4b7",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Andrew Nesbitt <andrewnez@gmail.com>",
+      "messages": [],
+      "total_additions": 34,
+      "total_deletions": 29,
+      "accepted_lines": 34,
+      "overriden_lines": 0
+    }
+  }
+}
