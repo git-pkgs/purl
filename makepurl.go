@@ -46,7 +46,7 @@ func BuildPURLString(ecosystem, name, version, registryURL string) string {
 		n += 1 + len(cleanVersion) // "@" + version
 	}
 	if needsQualifier {
-		n += 16 + len(registryURL) // "?repository_url=" + value
+		n += len("?repository_url=") + len(registryURL)
 	}
 
 	var b strings.Builder
@@ -138,8 +138,8 @@ func writeComponentEscaped(b *strings.Builder, s string) {
 			b.WriteByte(c)
 		} else {
 			b.WriteByte('%')
-			b.WriteByte(hexDigit(c >> 4))
-			b.WriteByte(hexDigit(c & 0x0f))
+			b.WriteByte(hexDigit(c >> 4))   //nolint:mnd
+			b.WriteByte(hexDigit(c & 0x0f)) //nolint:mnd
 		}
 	}
 }
@@ -163,8 +163,8 @@ func writeQualifierEscaped(b *strings.Builder, s string) {
 			b.WriteByte(c)
 		} else {
 			b.WriteByte('%')
-			b.WriteByte(hexDigit(c >> 4))
-			b.WriteByte(hexDigit(c & 0x0f))
+			b.WriteByte(hexDigit(c >> 4))   //nolint:mnd
+			b.WriteByte(hexDigit(c & 0x0f)) //nolint:mnd
 		}
 	}
 }
@@ -175,8 +175,8 @@ func isQualifierValueSafe(c byte) bool {
 }
 
 func hexDigit(b byte) byte {
-	if b < 10 {
+	if b < 10 { //nolint:mnd
 		return '0' + b
 	}
-	return 'A' + b - 10
+	return 'A' + b - 10 //nolint:mnd
 }

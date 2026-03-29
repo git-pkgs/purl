@@ -20,13 +20,14 @@ func TestTypeInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.purlType, func(t *testing.T) {
 			cfg := TypeInfo(tt.purlType)
-			if tt.wantNil {
+			switch {
+			case tt.wantNil:
 				if cfg != nil {
 					t.Errorf("TypeInfo(%q) = %v, want nil", tt.purlType, cfg)
 				}
-			} else if cfg == nil {
+			case cfg == nil:
 				t.Errorf("TypeInfo(%q) = nil, want non-nil", tt.purlType)
-			} else {
+			default:
 				if cfg.Description != tt.wantDescription {
 					t.Errorf("Description = %q, want %q", cfg.Description, tt.wantDescription)
 				}

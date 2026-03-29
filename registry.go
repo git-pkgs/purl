@@ -50,21 +50,23 @@ func expandTemplate(rc *RegistryConfig, namespace, name, version string) (string
 
 	// Select the appropriate template
 	if version != "" && rc.Components.VersionInURL {
-		if hasNamespace && rc.URITemplateWithVersion != "" {
+		switch {
+		case hasNamespace && rc.URITemplateWithVersion != "":
 			template = rc.URITemplateWithVersion
-		} else if !hasNamespace && rc.URITemplateWithVersionNoNS != "" {
+		case !hasNamespace && rc.URITemplateWithVersionNoNS != "":
 			template = rc.URITemplateWithVersionNoNS
-		} else if rc.URITemplateWithVersion != "" {
+		case rc.URITemplateWithVersion != "":
 			template = rc.URITemplateWithVersion
 		}
 	}
 
 	if template == "" {
-		if hasNamespace {
+		switch {
+		case hasNamespace:
 			template = rc.URITemplate
-		} else if rc.URITemplateNoNamespace != "" {
+		case rc.URITemplateNoNamespace != "":
 			template = rc.URITemplateNoNamespace
-		} else {
+		default:
 			template = rc.URITemplate
 		}
 	}
@@ -129,19 +131,19 @@ func ParseRegistryURLWithType(url, purlType string) (*PURL, error) {
 			if len(matches) > 1 {
 				namespace = matches[1]
 			}
-			if len(matches) > 2 {
+			if len(matches) > 2 { //nolint:mnd
 				name = matches[2]
 			}
-			if len(matches) > 3 {
+			if len(matches) > 3 { //nolint:mnd
 				version = matches[3]
 			}
 		} else {
 			// Namespace is optional: matches[1]=namespace (maybe empty), matches[2]=name
-			if len(matches) > 2 {
+			if len(matches) > 2 { //nolint:mnd
 				namespace = matches[1]
 				name = matches[2]
 			}
-			if len(matches) > 3 {
+			if len(matches) > 3 { //nolint:mnd
 				version = matches[3]
 			}
 		}
@@ -150,7 +152,7 @@ func ParseRegistryURLWithType(url, purlType string) (*PURL, error) {
 		if len(matches) > 1 {
 			name = matches[1]
 		}
-		if len(matches) > 2 {
+		if len(matches) > 2 { //nolint:mnd
 			version = matches[2]
 		}
 	}
