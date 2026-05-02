@@ -2,6 +2,7 @@ package purl
 
 import (
 	"errors"
+	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -86,9 +87,9 @@ func expandTemplate(rc *RegistryConfig, namespace, name, version string) (string
 
 	// Expand template variables
 	result := template
-	result = strings.ReplaceAll(result, "{namespace}", displayNamespace)
-	result = strings.ReplaceAll(result, "{name}", name)
-	result = strings.ReplaceAll(result, "{version}", version)
+	result = strings.ReplaceAll(result, "{namespace}", url.PathEscape(displayNamespace))
+	result = strings.ReplaceAll(result, "{name}", url.PathEscape(name))
+	result = strings.ReplaceAll(result, "{version}", url.PathEscape(version))
 
 	return result, nil
 }
