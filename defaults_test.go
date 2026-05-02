@@ -86,6 +86,24 @@ func TestIsNonDefaultRegistry(t *testing.T) {
 	}
 }
 
+func TestExtractHostRejectsUserinfo(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"https://evil.com@registry.npmjs.org/path", "registry.npmjs.org"},
+		{"https://registry.npmjs.org", "registry.npmjs.org"},
+		{"https://user:pass@evil.com/path", "evil.com"},
+		{"not-a-url", ""},
+	}
+	for _, tt := range tests {
+		got := extractHost(tt.input)
+		if got != tt.want {
+			t.Errorf("extractHost(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
 func TestIsPrivateRegistry(t *testing.T) {
 	tests := []struct {
 		purl string
