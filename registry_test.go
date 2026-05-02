@@ -1,6 +1,7 @@
 package purl
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -188,6 +189,18 @@ func TestParseRegistryURLWithType(t *testing.T) {
 				t.Errorf("ParseRegistryURLWithType() = %q, want %q", got, tt.wantPURL)
 			}
 		})
+	}
+}
+
+func TestRegistryURLEscapesSpecialChars(t *testing.T) {
+	// A name with path traversal characters should be escaped in the URL
+	p := New("npm", "", "evil/../../secret", "", nil)
+	got, err := p.RegistryURL()
+	if err != nil {
+		t.Fatalf("RegistryURL() error: %v", err)
+	}
+	if strings.Contains(got, "../../") {
+		t.Errorf("expected path traversal to be escaped in URL, got %s", got)
 	}
 }
 
