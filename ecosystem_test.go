@@ -139,7 +139,11 @@ func TestPURLTypeToOSV(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.purlType, func(t *testing.T) {
+		name := tt.purlType
+		if name == "" {
+			name = "empty"
+		}
+		t.Run(name, func(t *testing.T) {
 			got, ok := PURLTypeToOSV(tt.purlType)
 			if got != tt.want || ok != tt.ok {
 				t.Errorf("PURLTypeToOSV(%q) = %q, %v; want %q, %v", tt.purlType, got, ok, tt.want, tt.ok)
