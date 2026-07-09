@@ -113,6 +113,45 @@ func TestEcosystemToOSV(t *testing.T) {
 	}
 }
 
+func TestPURLTypeToOSV(t *testing.T) {
+	tests := []struct {
+		purlType string
+		want     string
+		ok       bool
+	}{
+		{"gem", "RubyGems", true},
+		{"npm", "npm", true},
+		{"pypi", "PyPI", true},
+		{"cargo", "crates.io", true},
+		{"golang", "Go", true},
+		{"maven", "Maven", true},
+		{"nuget", "NuGet", true},
+		{"composer", "Packagist", true},
+		{"hex", "Hex", true},
+		{"pub", "Pub", true},
+		{"cocoapods", "CocoaPods", true},
+		{"githubactions", "GitHub Actions", true},
+		// Unknown types report ok=false with an empty string, unlike
+		// EcosystemToOSV which passes the input through.
+		{"unknown", "", false},
+		{"", "", false},
+		{"generic", "", false},
+	}
+
+	for _, tt := range tests {
+		name := tt.purlType
+		if name == "" {
+			name = "empty"
+		}
+		t.Run(name, func(t *testing.T) {
+			got, ok := PURLTypeToOSV(tt.purlType)
+			if got != tt.want || ok != tt.ok {
+				t.Errorf("PURLTypeToOSV(%q) = %q, %v; want %q, %v", tt.purlType, got, ok, tt.want, tt.ok)
+			}
+		})
+	}
+}
+
 func TestPURLTypeToDepsdev(t *testing.T) {
 	tests := []struct {
 		purlType string
