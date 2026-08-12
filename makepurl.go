@@ -35,18 +35,20 @@ func BuildPURLString(ecosystem, name, version, registryURL string) string {
 	cleanVersion := CleanVersion(version, purlType)
 	namespace, pkgName := splitNamespace(ecosystem, name)
 
-	needsQualifier := registryURL != "" && IsNonDefaultRegistry(purlType, registryURL)
+	if registryURL != "" && !IsNonDefaultRegistry(purlType, registryURL) {
+		registryURL = ""
+	}
 
-	// Estimate capacity
-	n := 4 + len(purlType) + 1 + len(pkgName) // "pkg:" + type + "/" + name
-	if namespace != "" {
-		n += 1 + len(namespace) // "/" + namespace
+	return buildPURLString(purlType, namespace, pkgName, cleanVersion, registryURL)
+}
+
+func buildPURLString(purlType, namespace, name, version, registryURL string) string {
+	n := len("pkg:") + len(purlType) + escapedNamespaceLength(namespace) + 1 + escapedComponentLength(name)
+	if version != "" {
+		n += 1 + escapedComponentLength(version)
 	}
-	if cleanVersion != "" {
-		n += 1 + len(cleanVersion) // "@" + version
-	}
-	if needsQualifier {
-		n += len("?repository_url=") + len(registryURL)
+	if registryURL != "" {
+		n += len("?repository_url=") + escapedQualifierLength(registryURL)
 	}
 
 	var b strings.Builder
@@ -54,32 +56,62 @@ func BuildPURLString(ecosystem, name, version, registryURL string) string {
 
 	b.WriteString("pkg:")
 	b.WriteString(purlType)
-	if namespace != "" {
-		// Write namespace segments, escaping each one
-		for namespace != "" {
-			b.WriteByte('/')
-			seg := namespace
-			if i := strings.IndexByte(namespace, '/'); i >= 0 {
-				seg = namespace[:i]
-				namespace = namespace[i+1:]
-			} else {
-				namespace = ""
+	start := 0
+	for i := 0; i <= len(namespace); i++ {
+		if i == len(namespace) || namespace[i] == '/' {
+			if i > start {
+				b.WriteByte('/')
+				writeComponentEscaped(&b, namespace[start:i])
 			}
-			writeComponentEscaped(&b, seg)
+			start = i + 1
 		}
 	}
 	b.WriteByte('/')
-	writeComponentEscaped(&b, pkgName)
-	if cleanVersion != "" {
+	writeComponentEscaped(&b, name)
+	if version != "" {
 		b.WriteByte('@')
-		writeComponentEscaped(&b, cleanVersion)
+		writeComponentEscaped(&b, version)
 	}
-	if needsQualifier {
+	if registryURL != "" {
 		b.WriteString("?repository_url=")
 		writeQualifierEscaped(&b, registryURL)
 	}
 
 	return b.String()
+}
+
+func escapedNamespaceLength(namespace string) int {
+	n := 0
+	start := 0
+	for i := 0; i <= len(namespace); i++ {
+		if i == len(namespace) || namespace[i] == '/' {
+			if i > start {
+				n += 1 + escapedComponentLength(namespace[start:i])
+			}
+			start = i + 1
+		}
+	}
+	return n
+}
+
+func escapedComponentLength(s string) int {
+	n := len(s)
+	for i := 0; i < len(s); i++ {
+		if !isComponentSafe(s[i]) {
+			n += 2 //nolint:mnd
+		}
+	}
+	return n
+}
+
+func escapedQualifierLength(s string) int {
+	n := len(s)
+	for i := 0; i < len(s); i++ {
+		if !isQualifierValueSafe(s[i]) {
+			n += 2 //nolint:mnd
+		}
+	}
+	return n
 }
 
 // splitNamespace extracts namespace and package name from an ecosystem-native
@@ -93,14 +125,14 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string) {
 	}
 
 	switch normalized {
-	case "npm":
+	case ecosystemNPM:
 		if strings.HasPrefix(name, "@") {
 			if i := strings.IndexByte(name, '/'); i >= 0 {
 				namespace = name[:i]
 				pkgName = name[i+1:]
 			}
 		}
-	case "golang":
+	case ecosystemGolang:
 		if i := strings.LastIndex(name, "/"); i > 0 {
 			namespace = name[:i]
 			pkgName = name[i+1:]
@@ -110,12 +142,12 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string) {
 			namespace = name[:i]
 			pkgName = name[i+1:]
 		}
-	case "packagist", "composer":
+	case ecosystemPackagist, ecosystemComposer:
 		if i := strings.IndexByte(name, '/'); i >= 0 {
 			namespace = name[:i]
 			pkgName = name[i+1:]
 		}
-	case "github-actions":
+	case ecosystemGitHubActions:
 		if i := strings.IndexByte(name, '/'); i >= 0 {
 			namespace = name[:i]
 			rest := name[i+1:]

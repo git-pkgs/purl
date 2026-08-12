@@ -307,10 +307,97 @@ func TestMakePURL(t *testing.T) {
 }
 
 func TestMakePURLString(t *testing.T) {
-	got := MakePURLString("npm", "lodash", "4.17.21")
-	want := "pkg:npm/lodash@4.17.21"
-	if got != want {
-		t.Errorf("MakePURLString() = %q, want %q", got, want)
+	tests := []struct {
+		name      string
+		ecosystem string
+		pkg       string
+		version   string
+		want      string
+	}{
+		{
+			name:      "npm",
+			ecosystem: "npm",
+			pkg:       "lodash",
+			version:   "4.17.21",
+			want:      "pkg:npm/lodash@4.17.21",
+		},
+		{
+			name:      "scoped npm escaping",
+			ecosystem: "npm",
+			pkg:       "@scope/pkg+name",
+			version:   "1.0.0+build/meta?",
+			want:      "pkg:npm/%40scope/pkg%2Bname@1.0.0%2Bbuild%2Fmeta%3F",
+		},
+		{
+			name:      "uppercase ecosystem",
+			ecosystem: "NPM",
+			pkg:       "@scope/pkg",
+			version:   "",
+			want:      "pkg:npm/%40scope/pkg",
+		},
+		{
+			name:      "golang namespace",
+			ecosystem: "go",
+			pkg:       "github.com/foo/bar",
+			version:   "v1.0.0",
+			want:      "pkg:golang/github.com/foo/bar@v1.0.0",
+		},
+		{
+			name:      "golang empty namespace segment",
+			ecosystem: "golang",
+			pkg:       "github.com//foo/bar",
+			version:   "v1.0.0",
+			want:      "pkg:golang/github.com/foo/bar@v1.0.0",
+		},
+		{
+			name:      "maven escaping",
+			ecosystem: "maven",
+			pkg:       "org example:artifact@name",
+			version:   "3.12.0",
+			want:      "pkg:maven/org%20example/artifact%40name@3.12.0",
+		},
+		{
+			name:      "composer escaping",
+			ecosystem: "composer",
+			pkg:       "vendor+name/package name",
+			version:   "1.0",
+			want:      "pkg:composer/vendor%2Bname/package%20name@1.0",
+		},
+		{
+			name:      "default namespace",
+			ecosystem: "alpine",
+			pkg:       "curl/ssl",
+			version:   "8.0.0-r0",
+			want:      "pkg:apk/alpine/curl%2Fssl@8.0.0-r0",
+		},
+		{
+			name:      "github actions path",
+			ecosystem: "github-actions",
+			pkg:       "actions/cache/restore",
+			version:   "v4",
+			want:      "pkg:githubactions/actions/cache@v4",
+		},
+		{
+			name:      "generic ecosystem",
+			ecosystem: "cargo",
+			pkg:       "serde+derive",
+			version:   "1.0.0",
+			want:      "pkg:cargo/serde%2Bderive@1.0.0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := MakePURLString(tt.ecosystem, tt.pkg, tt.version)
+			if got != tt.want {
+				t.Errorf("MakePURLString(%q, %q, %q) = %q, want %q",
+					tt.ecosystem, tt.pkg, tt.version, got, tt.want)
+			}
+
+			if canonical := MakePURL(tt.ecosystem, tt.pkg, tt.version).String(); got != canonical {
+				t.Errorf("MakePURLString() = %q, MakePURL().String() = %q", got, canonical)
+			}
+		})
 	}
 }
 
