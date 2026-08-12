@@ -137,7 +137,7 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string) {
 			namespace = name[:i]
 			pkgName = name[i+1:]
 		}
-	case "maven":
+	case ecosystemMaven:
 		if i := strings.IndexByte(name, ':'); i >= 0 {
 			namespace = name[:i]
 			pkgName = name[i+1:]
