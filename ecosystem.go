@@ -4,61 +4,73 @@ import (
 	"strings"
 )
 
-const ecosystemMaven = "maven"
+const (
+	ecosystemAlpine        = "alpine"
+	ecosystemArch          = "arch"
+	ecosystemComposer      = "composer"
+	ecosystemGitHubActions = "github-actions"
+	ecosystemGolang        = "golang"
+	ecosystemMaven         = "maven"
+	ecosystemNPM           = "npm"
+	ecosystemPackagist     = "packagist"
+	ecosystemRubyGems      = "rubygems"
+	purlTypeGem            = "gem"
+	purlTypeGitHubActions  = "githubactions"
+)
 
 // purlTypeForEcosystem maps ecosystem names to PURL types.
 // Most ecosystems use their name as the PURL type, but some differ.
 var purlTypeForEcosystem = map[string]string{
-	"alpine":         "apk",
-	"arch":           "alpm",
-	"rubygems":       "gem",
-	"packagist":      "composer",
-	"github-actions": "githubactions",
+	ecosystemAlpine:        "apk",
+	ecosystemArch:          "alpm",
+	ecosystemRubyGems:      purlTypeGem,
+	ecosystemPackagist:     ecosystemComposer,
+	ecosystemGitHubActions: purlTypeGitHubActions,
 }
 
 // ecosystemAliases maps alternate names to canonical ecosystem names.
 var ecosystemAliases = map[string]string{
-	"go":       "golang",
-	"gem":      "rubygems",
-	"composer": "packagist",
+	"go":              ecosystemGolang,
+	purlTypeGem:       ecosystemRubyGems,
+	ecosystemComposer: ecosystemPackagist,
 }
 
 // osvEcosystemNames maps PURL types to OSV ecosystem names.
 var osvEcosystemNames = map[string]string{
-	"gem":           "RubyGems",
-	"npm":           "npm",
-	"pypi":          "PyPI",
-	"cargo":         "crates.io",
-	"conan":         "ConanCenter",
-	"cran":          "CRAN",
-	"golang":        "Go",
-	"hackage":       "Hackage",
-	ecosystemMaven:  "Maven",
-	"julia":         "Julia",
-	"nuget":         "NuGet",
-	"opam":          "opam",
-	"composer":      "Packagist",
-	"hex":           "Hex",
-	"pub":           "Pub",
-	"swift":         "SwiftURL",
-	"githubactions": "GitHub Actions",
+	purlTypeGem:           "RubyGems",
+	ecosystemNPM:          ecosystemNPM,
+	"pypi":                "PyPI",
+	"cargo":               "crates.io",
+	"conan":               "ConanCenter",
+	"cran":                "CRAN",
+	ecosystemGolang:       "Go",
+	"hackage":             "Hackage",
+	ecosystemMaven:        "Maven",
+	"julia":               "Julia",
+	"nuget":               "NuGet",
+	"opam":                "opam",
+	ecosystemComposer:     "Packagist",
+	"hex":                 "Hex",
+	"pub":                 "Pub",
+	"swift":               "SwiftURL",
+	purlTypeGitHubActions: "GitHub Actions",
 }
 
 // depsdevSystemNames maps PURL types to deps.dev system names.
 var depsdevSystemNames = map[string]string{
-	"npm":          "NPM",
-	"gem":          "RUBYGEMS",
-	"pypi":         "PYPI",
-	"cargo":        "CARGO",
-	"golang":       "GO",
-	ecosystemMaven: "MAVEN",
-	"nuget":        "NUGET",
+	ecosystemNPM:    "NPM",
+	purlTypeGem:     "RUBYGEMS",
+	"pypi":          "PYPI",
+	"cargo":         "CARGO",
+	ecosystemGolang: "GO",
+	ecosystemMaven:  "MAVEN",
+	"nuget":         "NUGET",
 }
 
 // defaultNamespaces defines default namespaces for certain ecosystems.
 var defaultNamespaces = map[string]string{
-	"alpine": "alpine",
-	"arch":   "arch",
+	ecosystemAlpine: ecosystemAlpine,
+	ecosystemArch:   ecosystemArch,
 }
 
 // NormalizeEcosystem returns the canonical ecosystem name.
@@ -145,7 +157,7 @@ func MakePURL(ecosystem, name, version string) *PURL {
 
 	// Extract namespace from name based on ecosystem conventions
 	switch NormalizeEcosystem(ecosystem) {
-	case "npm":
+	case ecosystemNPM:
 		if strings.HasPrefix(name, "@") {
 			parts := strings.SplitN(name, "/", 2) //nolint:mnd
 			if len(parts) == 2 {                  //nolint:mnd
@@ -153,7 +165,7 @@ func MakePURL(ecosystem, name, version string) *PURL {
 				pkgName = parts[1]
 			}
 		}
-	case "golang":
+	case ecosystemGolang:
 		if idx := strings.LastIndex(name, "/"); idx > 0 {
 			namespace = name[:idx]
 			pkgName = name[idx+1:]
@@ -164,13 +176,13 @@ func MakePURL(ecosystem, name, version string) *PURL {
 			namespace = parts[0]
 			pkgName = parts[1]
 		}
-	case "packagist", "composer":
+	case ecosystemPackagist, ecosystemComposer:
 		if strings.Contains(name, "/") {
 			parts := strings.SplitN(name, "/", 2) //nolint:mnd
 			namespace = parts[0]
 			pkgName = parts[1]
 		}
-	case "github-actions":
+	case ecosystemGitHubActions:
 		// GitHub Actions: owner/repo or owner/repo/path -> namespace=owner, name=repo (path ignored)
 		if strings.Contains(name, "/") {
 			parts := strings.SplitN(name, "/", 3) //nolint:mnd
@@ -184,7 +196,9 @@ func MakePURL(ecosystem, name, version string) *PURL {
 
 // MakePURLString is like MakePURL but returns the PURL as a string.
 func MakePURLString(ecosystem, name, version string) string {
-	return MakePURL(ecosystem, name, version).String()
+	purlType := EcosystemToPURLType(ecosystem)
+	namespace, pkgName := splitNamespace(ecosystem, name)
+	return buildPURLString(purlType, namespace, pkgName, version, "")
 }
 
 // SupportedEcosystems returns a list of all supported ecosystem names.
