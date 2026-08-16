@@ -168,6 +168,7 @@ func MakePURLString(ecosystem, name, version string) string {
 	if !ok {
 		return ""
 	}
+	namespace, pkgName, version = normalizeComponents(purlType, namespace, pkgName, version, "")
 	return buildPURLString(purlType, namespace, pkgName, version, "")
 }
 

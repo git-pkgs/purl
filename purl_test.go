@@ -124,6 +124,20 @@ func TestNew(t *testing.T) {
 			qualifiers: map[string]string{"repository_url": "https://npm.example.com"},
 			want:       "pkg:npm/lodash?repository_url=https:%2F%2Fnpm.example.com",
 		},
+		{
+			name:     "pypi normalization",
+			purlType: "pypi",
+			pkgName:  "Django_REST",
+			want:     "pkg:pypi/django-rest",
+		},
+		{
+			name:      "composer normalization",
+			purlType:  "composer",
+			namespace: "Symfony",
+			pkgName:   "Console",
+			version:   "6.1.7",
+			want:      "pkg:composer/symfony/console@6.1.7",
+		},
 	}
 
 	for _, tt := range tests {
@@ -131,6 +145,31 @@ func TestNew(t *testing.T) {
 			p := New(tt.purlType, tt.namespace, tt.pkgName, tt.version, tt.qualifiers)
 			if got := p.String(); got != tt.want {
 				t.Errorf("String() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewMatchesParse(t *testing.T) {
+	cases := []struct {
+		purlType, namespace, name, version string
+	}{
+		{"pypi", "", "Django", "4.2.0"},
+		{"pypi", "", "PyYAML", ""},
+		{"composer", "Symfony", "Console", "6.1.7"},
+		{"golang", "GitHub.com/Foo", "Bar", "v1.0.0"},
+		{"npm", "@Babel", "Core", "7.24.0"},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.purlType+"/"+tt.name, func(t *testing.T) {
+			built := New(tt.purlType, tt.namespace, tt.name, tt.version, nil).String()
+			parsed, err := Parse(built)
+			if err != nil {
+				t.Fatalf("Parse(%q) error: %v", built, err)
+			}
+			if parsed.String() != built {
+				t.Errorf("New = %q, Parse round-trip = %q", built, parsed.String())
 			}
 		})
 	}
