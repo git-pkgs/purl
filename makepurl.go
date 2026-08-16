@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/git-pkgs/vers"
+	packageurl "github.com/package-url/packageurl-go"
 )
 
 // CleanVersion extracts a version from a version constraint string.
@@ -43,7 +44,30 @@ func BuildPURLString(ecosystem, name, version, registryURL string) string {
 		registryURL = ""
 	}
 
+	namespace, pkgName, cleanVersion = normalizeComponents(purlType, namespace, pkgName, cleanVersion, registryURL)
 	return buildPURLString(purlType, namespace, pkgName, cleanVersion, registryURL)
+}
+
+// normalizeComponents applies packageurl-go's per-type canonicalization
+// (lowercasing composer/golang names, PyPI underscore-to-dash, etc) so the
+// fast-path string builders agree with Parse. The registryURL is passed as a
+// repository_url qualifier because some types (mlflow) vary name casing by
+// registry. Normalize's error is ignored so the result matches New, which also
+// discards it; whatever fields Normalize wrote before erroring are kept.
+func normalizeComponents(purlType, namespace, name, version, registryURL string) (string, string, string) {
+	var q packageurl.Qualifiers
+	if registryURL != "" {
+		q = packageurl.Qualifiers{{Key: "repository_url", Value: registryURL}}
+	}
+	p := packageurl.PackageURL{
+		Type:       purlType,
+		Namespace:  namespace,
+		Name:       name,
+		Version:    version,
+		Qualifiers: q,
+	}
+	_ = p.Normalize()
+	return p.Namespace, p.Name, p.Version
 }
 
 func buildPURLString(purlType, namespace, name, version, registryURL string) string {

@@ -26,6 +26,11 @@ func Parse(s string) (*PURL, error) {
 }
 
 // New creates a new PURL from components.
+//
+// The result is normalized with the same per-type rules Parse applies
+// (packageurl-go's Normalize), so New and Parse produce the same string for
+// equivalent inputs. Normalization errors are ignored; any adjustments
+// Normalize applied before erroring are kept.
 func New(purlType, namespace, name, version string, qualifiers map[string]string) *PURL {
 	var q packageurl.Qualifiers
 	if len(qualifiers) > 0 {
@@ -40,6 +45,7 @@ func New(purlType, namespace, name, version string, qualifiers map[string]string
 		}
 	}
 	p := packageurl.NewPackageURL(purlType, namespace, name, version, q, "")
+	_ = p.Normalize()
 	return &PURL{*p}
 }
 

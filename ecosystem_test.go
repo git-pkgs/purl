@@ -391,6 +391,20 @@ func TestMakePURLString(t *testing.T) {
 			want:      "pkg:composer/vendor%2Bname/package%20name@1.0",
 		},
 		{
+			name:      "composer normalization",
+			ecosystem: "composer",
+			pkg:       "Symfony/Console",
+			version:   "6.1.7",
+			want:      "pkg:composer/symfony/console@6.1.7",
+		},
+		{
+			name:      "pypi normalization",
+			ecosystem: "pypi",
+			pkg:       "Django_REST",
+			version:   "1.0.0",
+			want:      "pkg:pypi/django-rest@1.0.0",
+		},
+		{
 			name:      "default namespace",
 			ecosystem: "alpine",
 			pkg:       "curl/ssl",
@@ -436,6 +450,17 @@ func TestMakePURLString(t *testing.T) {
 				t.Errorf("MakePURLString() = %q, MakePURL().String() = %q", got, canonical)
 			}
 		})
+	}
+}
+
+func TestMakePURLStringMatchesMakePURLOnNormalizeError(t *testing.T) {
+	// chrome-extension names must be 32 lowercase letters; a short name makes
+	// packageurl-go's Normalize error after it has already lowercased the name.
+	// MakePURL and MakePURLString must still agree in that case.
+	got := MakePURLString("chrome-extension", "ABC", "")
+	want := MakePURL("chrome-extension", "ABC", "").String()
+	if got != want {
+		t.Errorf("MakePURLString = %q, MakePURL().String() = %q", got, want)
 	}
 }
 
