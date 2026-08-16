@@ -29,11 +29,15 @@ func CleanVersion(version, scheme string) string {
 
 // BuildPURLString builds a PURL string directly from ecosystem-native identifiers
 // without creating intermediate PURL structs. This is the fast path for manifest
-// parsing where we just need the string output.
+// parsing where we just need the string output. It returns an empty string when
+// the package identifier cannot be represented as a PURL.
 func BuildPURLString(ecosystem, name, version, registryURL string) string {
 	purlType := EcosystemToPURLType(ecosystem)
+	namespace, pkgName, ok := splitNamespace(ecosystem, name)
+	if !ok {
+		return ""
+	}
 	cleanVersion := CleanVersion(version, purlType)
-	namespace, pkgName := splitNamespace(ecosystem, name)
 
 	if registryURL != "" && !IsNonDefaultRegistry(purlType, registryURL) {
 		registryURL = ""
@@ -115,12 +119,14 @@ func escapedQualifierLength(s string) int {
 }
 
 // splitNamespace extracts namespace and package name from an ecosystem-native
-// package identifier.
-func splitNamespace(ecosystem, name string) (namespace, pkgName string) {
+// package identifier. It reports false when the identifier cannot be represented
+// by its ecosystem's PURL type.
+func splitNamespace(ecosystem, name string) (namespace, pkgName string, ok bool) {
 	pkgName = name
+	ok = true
 	normalized := NormalizeEcosystem(ecosystem)
 
-	if ns, ok := defaultNamespaces[normalized]; ok {
+	if ns, found := defaultNamespaces[normalized]; found {
 		namespace = ns
 	}
 
@@ -157,6 +163,17 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string) {
 				pkgName = rest
 			}
 		}
+	case ecosystemSwift:
+		i := strings.LastIndexByte(name, '/')
+		if i <= 0 || i == len(name)-1 {
+			return "", "", false
+		}
+		namespace = name[:i]
+		ownerSeparator := strings.IndexByte(namespace, '/')
+		if ownerSeparator <= 0 || ownerSeparator == len(namespace)-1 || strings.Contains(namespace, "//") {
+			return "", "", false
+		}
+		pkgName = name[i+1:]
 	}
 	return
 }

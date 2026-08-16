@@ -14,6 +14,7 @@ const (
 	ecosystemNPM           = "npm"
 	ecosystemPackagist     = "packagist"
 	ecosystemRubyGems      = "rubygems"
+	ecosystemSwift         = "swift"
 	purlTypeGem            = "gem"
 	purlTypeGitHubActions  = "githubactions"
 )
@@ -145,59 +146,28 @@ func PURLTypeToDepsdev(purlType string) string {
 //   - composer: vendor/package -> namespace="vendor", name="package"
 //   - alpine: pkg -> namespace="alpine", name="pkg"
 //   - arch: pkg -> namespace="arch", name="pkg"
+//   - swift: host/owner/package -> namespace="host/owner", name="package"
+//
+// Swift registry identities do not contain source repository coordinates and
+// return nil because the Swift PURL type cannot represent them.
 func MakePURL(ecosystem, name, version string) *PURL {
 	purlType := EcosystemToPURLType(ecosystem)
-	namespace := ""
-	pkgName := name
-
-	// Handle default namespaces
-	if ns, ok := defaultNamespaces[NormalizeEcosystem(ecosystem)]; ok {
-		namespace = ns
-	}
-
-	// Extract namespace from name based on ecosystem conventions
-	switch NormalizeEcosystem(ecosystem) {
-	case ecosystemNPM:
-		if strings.HasPrefix(name, "@") {
-			parts := strings.SplitN(name, "/", 2) //nolint:mnd
-			if len(parts) == 2 {                  //nolint:mnd
-				namespace = parts[0] // Keep the @ for packageurl-go
-				pkgName = parts[1]
-			}
-		}
-	case ecosystemGolang:
-		if idx := strings.LastIndex(name, "/"); idx > 0 {
-			namespace = name[:idx]
-			pkgName = name[idx+1:]
-		}
-	case ecosystemMaven:
-		if strings.Contains(name, ":") {
-			parts := strings.SplitN(name, ":", 2) //nolint:mnd
-			namespace = parts[0]
-			pkgName = parts[1]
-		}
-	case ecosystemPackagist, ecosystemComposer:
-		if strings.Contains(name, "/") {
-			parts := strings.SplitN(name, "/", 2) //nolint:mnd
-			namespace = parts[0]
-			pkgName = parts[1]
-		}
-	case ecosystemGitHubActions:
-		// GitHub Actions: owner/repo or owner/repo/path -> namespace=owner, name=repo (path ignored)
-		if strings.Contains(name, "/") {
-			parts := strings.SplitN(name, "/", 3) //nolint:mnd
-			namespace = parts[0]
-			pkgName = parts[1]
-		}
+	namespace, pkgName, ok := splitNamespace(ecosystem, name)
+	if !ok {
+		return nil
 	}
 
 	return New(purlType, namespace, pkgName, version, nil)
 }
 
-// MakePURLString is like MakePURL but returns the PURL as a string.
+// MakePURLString is like MakePURL but returns the PURL as a string. It returns
+// an empty string when the package identifier cannot be represented as a PURL.
 func MakePURLString(ecosystem, name, version string) string {
 	purlType := EcosystemToPURLType(ecosystem)
-	namespace, pkgName := splitNamespace(ecosystem, name)
+	namespace, pkgName, ok := splitNamespace(ecosystem, name)
+	if !ok {
+		return ""
+	}
 	return buildPURLString(purlType, namespace, pkgName, version, "")
 }
 

@@ -293,14 +293,41 @@ func TestMakePURL(t *testing.T) {
 			version:   "v3",
 			wantStr:   "pkg:githubactions/actions/cache@v3",
 		},
+		// Swift source coordinate
+		{
+			name:      "swift source coordinate",
+			ecosystem: "swift",
+			pkg:       "github.com/apple/swift-argument-parser",
+			version:   "1.8.2",
+			wantStr:   "pkg:swift/github.com/apple/swift-argument-parser@1.8.2",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := MakePURL(tt.ecosystem, tt.pkg, tt.version)
+			if p == nil {
+				t.Fatalf("MakePURL(%q, %q, %q) returned nil", tt.ecosystem, tt.pkg, tt.version)
+			}
 			if got := p.String(); got != tt.wantStr {
 				t.Errorf("MakePURL(%q, %q, %q).String() = %q, want %q",
 					tt.ecosystem, tt.pkg, tt.version, got, tt.wantStr)
+			}
+		})
+	}
+}
+
+func TestMakePURLRejectsSwiftRegistryIdentity(t *testing.T) {
+	identities := []string{
+		"apple.swift-argument-parser",
+		"apple/swift-argument-parser",
+		"/apple/swift-argument-parser",
+	}
+
+	for _, identity := range identities {
+		t.Run(identity, func(t *testing.T) {
+			if got := MakePURL("swift", identity, "1.8.2"); got != nil {
+				t.Errorf("MakePURL(%q) = %q, want nil", identity, got.String())
 			}
 		})
 	}
@@ -384,6 +411,13 @@ func TestMakePURLString(t *testing.T) {
 			version:   "1.0.0",
 			want:      "pkg:cargo/serde%2Bderive@1.0.0",
 		},
+		{
+			name:      "swift source coordinate",
+			ecosystem: "swift",
+			pkg:       "github.com/apple/swift-argument-parser",
+			version:   "1.8.2",
+			want:      "pkg:swift/github.com/apple/swift-argument-parser@1.8.2",
+		},
 	}
 
 	for _, tt := range tests {
@@ -394,8 +428,28 @@ func TestMakePURLString(t *testing.T) {
 					tt.ecosystem, tt.pkg, tt.version, got, tt.want)
 			}
 
-			if canonical := MakePURL(tt.ecosystem, tt.pkg, tt.version).String(); got != canonical {
+			p := MakePURL(tt.ecosystem, tt.pkg, tt.version)
+			if p == nil {
+				t.Fatalf("MakePURL(%q, %q, %q) returned nil", tt.ecosystem, tt.pkg, tt.version)
+			}
+			if canonical := p.String(); got != canonical {
 				t.Errorf("MakePURLString() = %q, MakePURL().String() = %q", got, canonical)
+			}
+		})
+	}
+}
+
+func TestMakePURLStringRejectsSwiftRegistryIdentity(t *testing.T) {
+	identities := []string{
+		"apple.swift-argument-parser",
+		"apple/swift-argument-parser",
+		"/apple/swift-argument-parser",
+	}
+
+	for _, identity := range identities {
+		t.Run(identity, func(t *testing.T) {
+			if got := MakePURLString("swift", identity, "1.8.2"); got != "" {
+				t.Errorf("MakePURLString(%q) = %q, want empty string", identity, got)
 			}
 		})
 	}

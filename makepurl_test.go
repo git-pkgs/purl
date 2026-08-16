@@ -64,6 +64,10 @@ func TestBuildPURLString(t *testing.T) {
 		{"with registry", "npm", "lodash", "1.0.0", "https://npm.example.com", "pkg:npm/lodash@1.0.0?repository_url=https:%2F%2Fnpm.example.com"},
 		{"default registry ignored", "npm", "lodash", "1.0.0", "https://registry.npmjs.org", "pkg:npm/lodash@1.0.0"},
 		{"composer", "packagist", "vendor/pkg", "1.0", "", "pkg:composer/vendor/pkg@1.0"},
+		{"swift source coordinate", "swift", "github.com/apple/swift-argument-parser", "1.8.2", "", "pkg:swift/github.com/apple/swift-argument-parser@1.8.2"},
+		{"swift registry identity", "swift", "apple.swift-argument-parser", "1.8.2", "", ""},
+		{"swift registry path", "swift", "apple/swift-argument-parser", "1.8.2", "", ""},
+		{"swift registry URL path", "swift", "/apple/swift-argument-parser", "1.8.2", "", ""},
 	}
 
 	for _, tt := range tests {
@@ -92,6 +96,7 @@ func TestBuildPURLStringMatchesMakePURL(t *testing.T) {
 		{"packagist", "vendor/pkg", "1.0", ""},
 		{"npm", "lodash", "^1.0.0", ""},
 		{"npm", "pkg", "1.0.0", "https://custom.registry.com"},
+		{"swift", "github.com/apple/swift-argument-parser", "1.8.2", ""},
 	}
 
 	for _, tt := range cases {
@@ -101,6 +106,9 @@ func TestBuildPURLStringMatchesMakePURL(t *testing.T) {
 			purlType := EcosystemToPURLType(tt.ecosystem)
 			cleanVersion := CleanVersion(tt.version, purlType)
 			p := MakePURL(tt.ecosystem, tt.name, cleanVersion)
+			if p == nil {
+				t.Fatalf("MakePURL(%q, %q, %q) returned nil", tt.ecosystem, tt.name, cleanVersion)
+			}
 			if tt.registryURL != "" && IsNonDefaultRegistry(purlType, tt.registryURL) {
 				p = p.WithQualifier("repository_url", tt.registryURL)
 			}
