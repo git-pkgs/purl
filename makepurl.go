@@ -11,7 +11,6 @@ import (
 // uses the vers library to extract the minimum bound. If parsing fails, it
 // returns the original string.
 func CleanVersion(version, scheme string) string {
-	version = strings.TrimSpace(version)
 	if version == "" {
 		return ""
 	}
