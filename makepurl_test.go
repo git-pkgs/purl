@@ -25,15 +25,25 @@ func TestCleanVersion(t *testing.T) {
 		{">=1.0.0", "pypi", "1.0.0"},
 		{"~=1.4.2", "pypi", "1.4.2"},
 
+		// maven constraints
+		{"[1.0,2.0)", "maven", "1.0"},
+
 		// cargo constraints
 		{"^1.0.0", "cargo", "1.0.0"},
 
+		// conan constraints
+		{"^1.2.3", "conan", "1.2.3"},
+
 		// Plain versions pass through
+		{"1.0", "composer", "1.0"},
+		{"1.0", "npm", "1.0"},
 		{"1.0.0", "npm", "1.0.0"},
 		{"v1.0.0", "go", "v1.0.0"},
+		{" 1.0 ", "composer", " 1.0 "},
 
-		// Empty
+		// Empty and whitespace-only
 		{"", "npm", ""},
+		{"   ", "npm", "   "},
 	}
 
 	for _, tt := range tests {
