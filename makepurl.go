@@ -14,7 +14,7 @@ func CleanVersion(version, scheme string) string {
 	if version == "" {
 		return ""
 	}
-	if vers.ValidWithScheme(version, scheme) {
+	if !hasConstraintSyntax(version, scheme) && vers.ValidWithScheme(version, scheme) {
 		return version
 	}
 
@@ -29,6 +29,28 @@ func CleanVersion(version, scheme string) string {
 	}
 
 	return version
+}
+
+func hasConstraintSyntax(version, scheme string) bool {
+	constraint := strings.TrimSpace(version)
+	if constraint == "" {
+		return false
+	}
+
+	switch constraint[0] {
+	case '<', '>', '=', '!', '^', '~':
+		return true
+	}
+
+	switch scheme {
+	case ecosystemMaven:
+		return constraint[0] == '[' || constraint[0] == '('
+	case "conan":
+		return constraint == "*" || constraint == "*-" ||
+			strings.Contains(constraint, "||") || strings.Contains(constraint, ",")
+	}
+
+	return false
 }
 
 // BuildPURLString builds a PURL string directly from ecosystem-native identifiers
