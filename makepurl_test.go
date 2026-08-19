@@ -29,6 +29,8 @@ func TestCleanVersion(t *testing.T) {
 		{"^1.0.0", "cargo", "1.0.0"},
 
 		// Plain versions pass through
+		{"1.0", "composer", "1.0"},
+		{"1.0", "npm", "1.0"},
 		{"1.0.0", "npm", "1.0.0"},
 		{"v1.0.0", "go", "v1.0.0"},
 
