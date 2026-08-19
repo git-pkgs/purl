@@ -7,12 +7,16 @@ import (
 	packageurl "github.com/package-url/packageurl-go"
 )
 
-// CleanVersion extracts a version from a version constraint string.
-// Uses the vers library to parse the constraint and extract the minimum bound.
-// If parsing fails, returns the original string.
+// CleanVersion returns plain versions unchanged. For version constraints, it
+// uses the vers library to extract the minimum bound. If parsing fails, it
+// returns the original string.
 func CleanVersion(version, scheme string) string {
+	version = strings.TrimSpace(version)
 	if version == "" {
 		return ""
+	}
+	if vers.ValidWithScheme(version, scheme) {
+		return version
 	}
 
 	r, err := vers.ParseNative(version, scheme)
