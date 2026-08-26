@@ -4,5 +4,5 @@ go 1.25.6
 
 require (
 	github.com/git-pkgs/vers v0.3.1
-	github.com/package-url/packageurl-go v0.1.6
+	github.com/package-url/packageurl-go v0.1.7
 )
