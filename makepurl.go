@@ -7,12 +7,15 @@ import (
 	packageurl "github.com/package-url/packageurl-go"
 )
 
-// CleanVersion extracts a version from a version constraint string.
-// Uses the vers library to parse the constraint and extract the minimum bound.
-// If parsing fails, returns the original string.
+// CleanVersion returns plain versions unchanged. For version constraints, it
+// uses the vers library to extract the minimum bound. If parsing fails, it
+// returns the original string.
 func CleanVersion(version, scheme string) string {
 	if version == "" {
 		return ""
+	}
+	if !hasConstraintSyntax(version, scheme) && vers.ValidWithScheme(version, scheme) {
+		return version
 	}
 
 	r, err := vers.ParseNative(version, scheme)
@@ -26,6 +29,29 @@ func CleanVersion(version, scheme string) string {
 	}
 
 	return version
+}
+
+func hasConstraintSyntax(version, scheme string) bool {
+	constraint := strings.TrimSpace(version)
+	if constraint == "" {
+		return false
+	}
+
+	switch constraint[0] {
+	case '<', '>', '=', '!', '^', '~':
+		return true
+	}
+
+	switch scheme {
+	case ecosystemMaven:
+		return constraint[0] == '[' || constraint[0] == '('
+	case "conan":
+		return constraint == "*" || constraint == "*-" ||
+			strings.HasSuffix(constraint, "-") || strings.Contains(constraint, "||") ||
+			strings.Contains(constraint, ",")
+	}
+
+	return false
 }
 
 // BuildPURLString builds a PURL string directly from ecosystem-native identifiers
