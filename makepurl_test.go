@@ -16,6 +16,8 @@ func TestCleanVersion(t *testing.T) {
 		{"~1.0.0", "npm", "1.0.0"},
 		{">=1.0.0", "npm", "1.0.0"},
 		{">=1.0.0 <2.0.0", "npm", "1.0.0"},
+		{">1.0.0", "npm", ">1.0.0"},
+		{"2.0.0 || 1.0.0", "npm", "1.0.0"},
 
 		// gem constraints
 		{"~> 1.0", "gem", "1.0"},
@@ -27,6 +29,7 @@ func TestCleanVersion(t *testing.T) {
 
 		// maven constraints
 		{"[1.0,2.0)", "maven", "1.0"},
+		{"(1.0,2.0]", "maven", "(1.0,2.0]"},
 
 		// cargo constraints
 		{"^1.0.0", "cargo", "1.0.0"},
@@ -66,6 +69,7 @@ func TestBuildPURLString(t *testing.T) {
 		want        string
 	}{
 		{"simple npm", "npm", "lodash", "4.17.21", "", "pkg:npm/lodash@4.17.21"},
+		{"exclusive npm constraint", "npm", "lodash", ">1.0.0", "", "pkg:npm/lodash@%3E1.0.0"},
 		{"scoped npm", "npm", "@babel/core", "7.20.0", "", "pkg:npm/%40babel/core@7.20.0"}, // @ encoded in namespace
 		{"gem", "rubygems", "rails", "7.0.0", "", "pkg:gem/rails@7.0.0"},
 		{"pypi", "pypi", "requests", "2.28.0", "", "pkg:pypi/requests@2.28.0"},

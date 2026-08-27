@@ -8,8 +8,8 @@ import (
 )
 
 // CleanVersion returns plain versions unchanged. For version constraints, it
-// uses the vers library to extract the minimum bound. If parsing fails, it
-// returns the original string.
+// uses the vers library to extract the lowest included version. If no included
+// minimum can be identified, it returns the original string.
 func CleanVersion(version, scheme string) string {
 	if version == "" {
 		return ""
@@ -19,13 +19,12 @@ func CleanVersion(version, scheme string) string {
 	}
 
 	r, err := vers.ParseNative(version, scheme)
-	if err != nil || len(r.Intervals) == 0 {
+	if err != nil {
 		return version
 	}
 
-	// Return the minimum bound from the first interval
-	if r.Intervals[0].Min != "" {
-		return r.Intervals[0].Min
+	if minimum, ok := r.MinimumVersion(); ok {
+		return minimum
 	}
 
 	return version
