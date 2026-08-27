@@ -47,7 +47,8 @@ func hasConstraintSyntax(version, scheme string) bool {
 		return constraint[0] == '[' || constraint[0] == '('
 	case "conan":
 		return constraint == "*" || constraint == "*-" ||
-			strings.Contains(constraint, "||") || strings.Contains(constraint, ",")
+			strings.HasSuffix(constraint, "-") || strings.Contains(constraint, "||") ||
+			strings.Contains(constraint, ",")
 	}
 
 	return false

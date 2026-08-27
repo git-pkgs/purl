@@ -33,6 +33,7 @@ func TestCleanVersion(t *testing.T) {
 
 		// conan constraints
 		{"^1.2.3", "conan", "1.2.3"},
+		{"1.2.3-", "conan", "1.2.3"},
 
 		// Plain versions pass through
 		{"1.0", "composer", "1.0"},
@@ -74,6 +75,7 @@ func TestBuildPURLString(t *testing.T) {
 		{"with registry", "npm", "lodash", "1.0.0", "https://npm.example.com", "pkg:npm/lodash@1.0.0?repository_url=https:%2F%2Fnpm.example.com"},
 		{"default registry ignored", "npm", "lodash", "1.0.0", "https://registry.npmjs.org", "pkg:npm/lodash@1.0.0"},
 		{"composer", "packagist", "vendor/pkg", "1.0", "", "pkg:composer/vendor/pkg@1.0"},
+		{"conan range prerelease marker", "conan", "openssl", "1.2.3-", "", "pkg:conan/openssl@1.2.3"},
 		{"composer normalization", "packagist", "Vendor/Package", "1.0", "", "pkg:composer/vendor/package@1.0"},
 		{"pypi normalization", "pypi", "Django_REST", "1.0.0", "", "pkg:pypi/django-rest@1.0.0"},
 		{"golang normalization", "golang", "GitHub.com/Foo/Bar", "v1.0.0", "", "pkg:golang/github.com/foo/bar@v1.0.0"},
