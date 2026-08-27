@@ -1,6 +1,8 @@
 module github.com/git-pkgs/purl
 
-go 1.25.6
+go 1.26.0
+
+toolchain go1.27.0
 
 require (
 	github.com/git-pkgs/vers v0.6.0
