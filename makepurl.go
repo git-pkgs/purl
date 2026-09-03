@@ -65,6 +65,9 @@ func BuildPURLString(ecosystem, name, version, registryURL string) string {
 	}
 	cleanVersion := CleanVersion(version, purlType)
 
+	if suppressRepositoryURL(purlType) {
+		registryURL = ""
+	}
 	if registryURL != "" && !IsNonDefaultRegistry(purlType, registryURL) {
 		registryURL = ""
 	}
@@ -93,6 +96,15 @@ func normalizeComponents(purlType, namespace, name, version, registryURL string)
 	}
 	_ = p.Normalize()
 	return p.Namespace, p.Name, p.Version
+}
+
+// suppressRepositoryURL reports whether BuildPURLString should drop the
+// caller's registryURL instead of emitting a repository_url qualifier. Helm
+// Chart.yaml repository values include machine-local aliases and relative
+// file paths that do not identify a package outside the author's environment,
+// and the pkg:helm type has no accepted repository_url qualifier definition.
+func suppressRepositoryURL(purlType string) bool {
+	return purlType == "helm"
 }
 
 func buildPURLString(purlType, namespace, name, version, registryURL string) string {
