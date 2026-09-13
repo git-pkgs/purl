@@ -55,11 +55,12 @@ func (t *TypeConfig) NamespaceProhibited() bool {
 }
 
 type typesData struct {
-	Version     string                `json:"version"`
-	Description string                `json:"description"`
-	Source      string                `json:"source"`
-	LastUpdated string                `json:"last_updated"`
-	Types       map[string]TypeConfig `json:"types"`
+	defaultHosts map[string]string
+	Version      string                `json:"version"`
+	Description  string                `json:"description"`
+	Source       string                `json:"source"`
+	LastUpdated  string                `json:"last_updated"`
+	Types        map[string]TypeConfig `json:"types"`
 }
 
 var (
@@ -72,6 +73,13 @@ func loadTypes() (*typesData, error) {
 	loadOnce.Do(func() {
 		loadedData = &typesData{}
 		loadErr = json.Unmarshal(typesJSON, loadedData)
+		loadedData.defaultHosts = make(map[string]string)
+		for _, cfg := range loadedData.Types {
+			if cfg.DefaultRegistry != nil {
+				registry := *cfg.DefaultRegistry
+				loadedData.defaultHosts[registry] = extractHost(registry)
+			}
+		}
 	})
 	return loadedData, loadErr
 }

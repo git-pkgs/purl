@@ -11,8 +11,12 @@ func IsDefaultRegistry(purlType, registryURL string) bool {
 		return true
 	}
 
-	cfg := TypeInfo(purlType)
-	if cfg == nil || cfg.DefaultRegistry == nil {
+	data, err := loadTypes()
+	if err != nil {
+		return false
+	}
+	cfg, ok := data.Types[purlType]
+	if !ok || cfg.DefaultRegistry == nil {
 		return false
 	}
 
@@ -21,8 +25,11 @@ func IsDefaultRegistry(purlType, registryURL string) bool {
 		return false
 	}
 
-	// Compare hosts
-	defaultHost := extractHost(defaultURL)
+	defaultHost, ok := data.defaultHosts[defaultURL]
+	if !ok {
+		// TypeInfo exposes the default URL through a shared pointer.
+		defaultHost = extractHost(defaultURL)
+	}
 	givenHost := extractHost(registryURL)
 
 	if defaultHost == "" || givenHost == "" {
