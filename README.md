@@ -56,4 +56,4 @@ purl.DefaultRegistry("npm") // https://registry.npmjs.org
 
 ## License
 
-MIT
+[MIT](LICENSE).
