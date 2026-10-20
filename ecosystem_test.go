@@ -189,249 +189,32 @@ func TestPURLTypeToDepsdev(t *testing.T) {
 	}
 }
 
-func TestMakePURL(t *testing.T) {
-	tests := []struct {
-		name      string
-		ecosystem string
-		pkg       string
-		version   string
-		wantStr   string
-	}{
-		// npm with scope
-		{
-			name:      "npm scoped",
-			ecosystem: "npm",
-			pkg:       "@babel/core",
-			version:   "7.24.0",
-			wantStr:   "pkg:npm/%40babel/core@7.24.0",
-		},
-		// npm without scope
-		{
-			name:      "npm unscoped",
-			ecosystem: "npm",
-			pkg:       "lodash",
-			version:   "4.17.21",
-			wantStr:   "pkg:npm/lodash@4.17.21",
-		},
-		// golang
-		{
-			name:      "golang",
-			ecosystem: "golang",
-			pkg:       "github.com/foo/bar",
-			version:   "v1.0.0",
-			wantStr:   "pkg:golang/github.com/foo/bar@v1.0.0",
-		},
-		// maven
-		{
-			name:      "maven",
-			ecosystem: "maven",
-			pkg:       "org.apache.commons:commons-lang3",
-			version:   "3.12.0",
-			wantStr:   "pkg:maven/org.apache.commons/commons-lang3@3.12.0",
-		},
-		// packagist/composer
-		{
-			name:      "packagist",
-			ecosystem: "packagist",
-			pkg:       "laravel/framework",
-			version:   "9.0.0",
-			wantStr:   "pkg:composer/laravel/framework@9.0.0",
-		},
-		// alpine (default namespace)
-		{
-			name:      "alpine",
-			ecosystem: "alpine",
-			pkg:       "curl",
-			version:   "8.0.0",
-			wantStr:   "pkg:apk/alpine/curl@8.0.0",
-		},
-		// arch (default namespace)
-		{
-			name:      "arch",
-			ecosystem: "arch",
-			pkg:       "base",
-			version:   "1.0",
-			wantStr:   "pkg:alpm/arch/base@1.0",
-		},
-		// cargo (no special handling)
-		{
-			name:      "cargo",
-			ecosystem: "cargo",
-			pkg:       "serde",
-			version:   "1.0.0",
-			wantStr:   "pkg:cargo/serde@1.0.0",
-		},
-		// pypi
-		{
-			name:      "pypi",
-			ecosystem: "pypi",
-			pkg:       "requests",
-			version:   "2.28.0",
-			wantStr:   "pkg:pypi/requests@2.28.0",
-		},
-		// using alias
-		{
-			name:      "go alias",
-			ecosystem: "go",
-			pkg:       "github.com/user/repo",
-			version:   "v1.0.0",
-			wantStr:   "pkg:golang/github.com/user/repo@v1.0.0",
-		},
-		// github-actions
-		{
-			name:      "github-actions",
-			ecosystem: "github-actions",
-			pkg:       "actions/checkout",
-			version:   "v4",
-			wantStr:   "pkg:githubactions/actions/checkout@v4",
-		},
-		// github-actions with path
-		{
-			name:      "github-actions with path",
-			ecosystem: "github-actions",
-			pkg:       "actions/cache/restore",
-			version:   "v3",
-			wantStr:   "pkg:githubactions/actions/cache@v3",
-		},
-		// Swift source coordinate
-		{
-			name:      "swift source coordinate",
-			ecosystem: "swift",
-			pkg:       "github.com/apple/swift-argument-parser",
-			version:   "1.8.2",
-			wantStr:   "pkg:swift/github.com/apple/swift-argument-parser@1.8.2",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := MakePURL(tt.ecosystem, tt.pkg, tt.version)
-			if p == nil {
-				t.Fatalf("MakePURL(%q, %q, %q) returned nil", tt.ecosystem, tt.pkg, tt.version)
-			}
-			if got := p.String(); got != tt.wantStr {
-				t.Errorf("MakePURL(%q, %q, %q).String() = %q, want %q",
-					tt.ecosystem, tt.pkg, tt.version, got, tt.wantStr)
-			}
-		})
-	}
-}
-
-func TestMakePURLRejectsSwiftRegistryIdentity(t *testing.T) {
-	identities := []string{
-		"apple.swift-argument-parser",
-		"apple/swift-argument-parser",
-		"/apple/swift-argument-parser",
-	}
-
-	for _, identity := range identities {
-		t.Run(identity, func(t *testing.T) {
-			if got := MakePURL("swift", identity, "1.8.2"); got != nil {
-				t.Errorf("MakePURL(%q) = %q, want nil", identity, got.String())
-			}
-		})
-	}
-}
-
 func TestMakePURLString(t *testing.T) {
 	tests := []struct {
-		name      string
-		ecosystem string
-		pkg       string
-		version   string
-		want      string
+		name, ecosystem, pkg, version, want string
 	}{
-		{
-			name:      "npm",
-			ecosystem: "npm",
-			pkg:       "lodash",
-			version:   "4.17.21",
-			want:      "pkg:npm/lodash@4.17.21",
-		},
-		{
-			name:      "scoped npm escaping",
-			ecosystem: "npm",
-			pkg:       "@scope/pkg+name",
-			version:   "1.0.0+build/meta?",
-			want:      "pkg:npm/%40scope/pkg%2Bname@1.0.0%2Bbuild%2Fmeta%3F",
-		},
-		{
-			name:      "uppercase ecosystem",
-			ecosystem: "NPM",
-			pkg:       "@scope/pkg",
-			version:   "",
-			want:      "pkg:npm/%40scope/pkg",
-		},
-		{
-			name:      "golang namespace",
-			ecosystem: "go",
-			pkg:       "github.com/foo/bar",
-			version:   "v1.0.0",
-			want:      "pkg:golang/github.com/foo/bar@v1.0.0",
-		},
-		{
-			name:      "golang empty namespace segment",
-			ecosystem: "golang",
-			pkg:       "github.com//foo/bar",
-			version:   "v1.0.0",
-			want:      "pkg:golang/github.com/foo/bar@v1.0.0",
-		},
-		{
-			name:      "maven escaping",
-			ecosystem: "maven",
-			pkg:       "org example:artifact@name",
-			version:   "3.12.0",
-			want:      "pkg:maven/org%20example/artifact%40name@3.12.0",
-		},
-		{
-			name:      "composer escaping",
-			ecosystem: "composer",
-			pkg:       "vendor+name/package name",
-			version:   "1.0",
-			want:      "pkg:composer/vendor%2Bname/package%20name@1.0",
-		},
-		{
-			name:      "composer normalization",
-			ecosystem: "composer",
-			pkg:       "Symfony/Console",
-			version:   "6.1.7",
-			want:      "pkg:composer/symfony/console@6.1.7",
-		},
-		{
-			name:      "pypi normalization",
-			ecosystem: "pypi",
-			pkg:       "Django_REST",
-			version:   "1.0.0",
-			want:      "pkg:pypi/django-rest@1.0.0",
-		},
-		{
-			name:      "default namespace",
-			ecosystem: "alpine",
-			pkg:       "curl/ssl",
-			version:   "8.0.0-r0",
-			want:      "pkg:apk/alpine/curl%2Fssl@8.0.0-r0",
-		},
-		{
-			name:      "github actions path",
-			ecosystem: "github-actions",
-			pkg:       "actions/cache/restore",
-			version:   "v4",
-			want:      "pkg:githubactions/actions/cache@v4",
-		},
-		{
-			name:      "generic ecosystem",
-			ecosystem: "cargo",
-			pkg:       "serde+derive",
-			version:   "1.0.0",
-			want:      "pkg:cargo/serde%2Bderive@1.0.0",
-		},
-		{
-			name:      "swift source coordinate",
-			ecosystem: "swift",
-			pkg:       "github.com/apple/swift-argument-parser",
-			version:   "1.8.2",
-			want:      "pkg:swift/github.com/apple/swift-argument-parser@1.8.2",
-		},
+		{"npm", "npm", "lodash", "4.17.21", "pkg:npm/lodash@4.17.21"},
+		{"npm scoped", "npm", "@babel/core", "7.24.0", "pkg:npm/%40babel/core@7.24.0"},
+		{"scoped npm escaping", "npm", "@scope/pkg+name", "1.0.0+build/meta?", "pkg:npm/%40scope/pkg%2Bname@1.0.0%2Bbuild%2Fmeta%3F"},
+		{"uppercase ecosystem", "NPM", "@scope/pkg", "", "pkg:npm/%40scope/pkg"},
+		{"golang namespace", "golang", "github.com/foo/bar", "v1.0.0", "pkg:golang/github.com/foo/bar@v1.0.0"},
+		{"go alias", "go", "github.com/user/repo", "v1.0.0", "pkg:golang/github.com/user/repo@v1.0.0"},
+		{"golang empty namespace segment", "golang", "github.com//foo/bar", "v1.0.0", "pkg:golang/github.com/foo/bar@v1.0.0"},
+		{"maven", "maven", "org.apache.commons:commons-lang3", "3.12.0", "pkg:maven/org.apache.commons/commons-lang3@3.12.0"},
+		{"maven escaping", "maven", "org example:artifact@name", "3.12.0", "pkg:maven/org%20example/artifact%40name@3.12.0"},
+		{"packagist", "packagist", "laravel/framework", "9.0.0", "pkg:composer/laravel/framework@9.0.0"},
+		{"composer escaping", "composer", "vendor+name/package name", "1.0", "pkg:composer/vendor%2Bname/package%20name@1.0"},
+		{"composer normalization", "composer", "Symfony/Console", "6.1.7", "pkg:composer/symfony/console@6.1.7"},
+		{"pypi", "pypi", "requests", "2.28.0", "pkg:pypi/requests@2.28.0"},
+		{"pypi normalization", "pypi", "Django_REST", "1.0.0", "pkg:pypi/django-rest@1.0.0"},
+		{"alpine default namespace", "alpine", "curl", "8.0.0", "pkg:apk/alpine/curl@8.0.0"},
+		{"alpine default namespace escaping", "alpine", "curl/ssl", "8.0.0-r0", "pkg:apk/alpine/curl%2Fssl@8.0.0-r0"},
+		{"arch default namespace", "arch", "base", "1.0", "pkg:alpm/arch/base@1.0"},
+		{"github-actions", "github-actions", "actions/checkout", "v4", "pkg:githubactions/actions/checkout@v4"},
+		{"github-actions path", "github-actions", "actions/cache/restore", "v4", "pkg:githubactions/actions/cache@v4"},
+		{"cargo", "cargo", "serde", "1.0.0", "pkg:cargo/serde@1.0.0"},
+		{"generic ecosystem escaping", "cargo", "serde+derive", "1.0.0", "pkg:cargo/serde%2Bderive@1.0.0"},
+		{"swift source coordinate", "swift", "github.com/apple/swift-argument-parser", "1.8.2", "pkg:swift/github.com/apple/swift-argument-parser@1.8.2"},
 	}
 
 	for _, tt := range tests {
@@ -464,7 +247,7 @@ func TestMakePURLStringMatchesMakePURLOnNormalizeError(t *testing.T) {
 	}
 }
 
-func TestMakePURLStringRejectsSwiftRegistryIdentity(t *testing.T) {
+func TestMakePURLRejectsSwiftRegistryIdentity(t *testing.T) {
 	identities := []string{
 		"apple.swift-argument-parser",
 		"apple/swift-argument-parser",
@@ -473,6 +256,9 @@ func TestMakePURLStringRejectsSwiftRegistryIdentity(t *testing.T) {
 
 	for _, identity := range identities {
 		t.Run(identity, func(t *testing.T) {
+			if got := MakePURL("swift", identity, "1.8.2"); got != nil {
+				t.Errorf("MakePURL(%q) = %q, want nil", identity, got.String())
+			}
 			if got := MakePURLString("swift", identity, "1.8.2"); got != "" {
 				t.Errorf("MakePURLString(%q) = %q, want empty string", identity, got)
 			}
