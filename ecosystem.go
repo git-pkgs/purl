@@ -5,19 +5,20 @@ import (
 )
 
 const (
-	ecosystemAlpine        = "alpine"
-	ecosystemArch          = "arch"
-	ecosystemComposer      = "composer"
-	ecosystemGit           = "git"
-	ecosystemGitHubActions = "github-actions"
-	ecosystemGolang        = "golang"
-	ecosystemMaven         = "maven"
-	ecosystemNPM           = "npm"
-	ecosystemPackagist     = "packagist"
-	ecosystemRubyGems      = "rubygems"
-	ecosystemSwift         = "swift"
-	purlTypeGem            = "gem"
-	purlTypeGitHubActions  = "githubactions"
+	ecosystemAlpine         = "alpine"
+	ecosystemArch           = "arch"
+	ecosystemComposer       = "composer"
+	ecosystemGit            = "git"
+	ecosystemGitHubActions  = "github-actions"
+	ecosystemGolang         = "golang"
+	ecosystemMaven          = "maven"
+	ecosystemNPM            = "npm"
+	ecosystemPackagist      = "packagist"
+	ecosystemRubyGems       = "rubygems"
+	ecosystemSwift          = "swift"
+	purlTypeGem             = "gem"
+	purlTypeGitHubActions   = "githubactions"
+	purlTypeVSCodeExtension = "vscode-extension"
 )
 
 // purlTypeForEcosystem maps ecosystem names to PURL types.

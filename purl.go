@@ -33,7 +33,17 @@ func Parse(s string) (*PURL, error) {
 			p.Name = path + "/" + p.Name
 		}
 	}
+	lowercaseCaseInsensitive(&p)
 	return &PURL{p}, nil
+}
+
+// lowercaseCaseInsensitive lowercases components the spec declares
+// case-insensitive where packageurl-go's Normalize leaves them as given.
+func lowercaseCaseInsensitive(p *packageurl.PackageURL) {
+	if p.Type == purlTypeVSCodeExtension {
+		p.Namespace = strings.ToLower(p.Namespace)
+		p.Name = strings.ToLower(p.Name)
+	}
 }
 
 // New creates a new PURL from components.
@@ -57,6 +67,7 @@ func New(purlType, namespace, name, version string, qualifiers map[string]string
 	}
 	p := packageurl.NewPackageURL(purlType, namespace, name, version, q, "")
 	_ = p.Normalize()
+	lowercaseCaseInsensitive(p)
 	return &PURL{*p}
 }
 

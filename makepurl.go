@@ -93,6 +93,7 @@ func normalizeComponents(purlType, namespace, name, version, registryURL string)
 		Qualifiers: q,
 	}
 	_ = p.Normalize()
+	lowercaseCaseInsensitive(&p)
 	return p.Namespace, p.Name, p.Version
 }
 
@@ -234,6 +235,8 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string, ok bool)
 				pkgName = rest
 			}
 		}
+	case purlTypeVSCodeExtension:
+		return splitVSCodeExtension(name)
 	case ecosystemSwift:
 		i := strings.LastIndexByte(name, '/')
 		if i <= 0 || i == len(name)-1 {
@@ -247,6 +250,15 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string, ok bool)
 		pkgName = name[i+1:]
 	}
 	return
+}
+
+// splitVSCodeExtension splits VS Code's publisher.name extension identifier.
+func splitVSCodeExtension(name string) (publisher, extension string, ok bool) {
+	publisher, extension, ok = strings.Cut(name, ".")
+	if !ok || publisher == "" || extension == "" {
+		return "", "", false
+	}
+	return publisher, extension, true
 }
 
 // writeComponentEscaped writes s to b, percent-encoding characters that are not safe
