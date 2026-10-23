@@ -42,7 +42,24 @@ fmt.Println(*cfg.DefaultRegistry)  // https://registry.npmjs.org
 // Clean version constraints
 version := purl.CleanVersion("^1.2.3", "npm")
 fmt.Println(version)  // 1.2.3
+
+// Compare two spellings of the same package
+a, _ := purl.Parse("pkg:pypi/zope.interface@6.0")
+b, _ := purl.Parse("pkg:pypi/Zope_Interface@6.0")
+fmt.Println(a.ComparisonForm().String() == b.ComparisonForm().String())  // true
 ```
+
+`ComparisonForm` applies ecosystem rules that `Parse` does not, so `String()`
+output stays stable for callers that store it:
+
+| Type | Rule |
+|------|------|
+| pypi | name lowercased, runs of `-`, `_`, `.` become `-` (PEP 503) |
+| nuget | name and version lowercased |
+| composer | leading `v`/`V` before a digit dropped from the version |
+| conda | channel given as namespace or `channel/name` moved to the `channel` qualifier |
+| oci | namespace folded into the name (`library/alpine`) |
+| swift | registry identities (scope without `.` or `/`) lowercased |
 
 ## Type Configuration
 
