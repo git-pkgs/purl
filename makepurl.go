@@ -210,7 +210,7 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string, ok bool)
 				pkgName = name[i+1:]
 			}
 		}
-	case ecosystemGolang:
+	case ecosystemGolang, "docker":
 		if i := strings.LastIndex(name, "/"); i > 0 {
 			namespace = name[:i]
 			pkgName = name[i+1:]
