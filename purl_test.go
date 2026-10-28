@@ -35,6 +35,8 @@ func TestParse(t *testing.T) {
 		// Go modules
 		{"pkg:golang/github.com/gorilla/mux", "golang", "github.com/gorilla", "mux", "", false},
 		{"pkg:golang/github.com/gorilla/mux@v1.8.0", "golang", "github.com/gorilla", "mux", "v1.8.0", false},
+		{"pkg:golang/github.com/Azure/azure-sdk-for-go@v1.0.0", "golang", "github.com/Azure", "azure-sdk-for-go", "v1.0.0", false},
+		{"pkg:golang/github.com/%41zure/azure-sdk-for-go@v1.0.0", "golang", "github.com/Azure", "azure-sdk-for-go", "v1.0.0", false},
 
 		// Terraform modules
 		{"pkg:terraform/hashicorp/consul/aws", "terraform", "hashicorp/consul", "aws", "", false},
@@ -75,6 +77,22 @@ func TestParse(t *testing.T) {
 				t.Errorf("Version = %q, want %q", p.Version, tt.wantVer)
 			}
 		})
+	}
+}
+
+func TestParsePreservesGolangPathCase(t *testing.T) {
+	const input = "pkg:golang/github.com/%41zure/azure-sdk-for-go@v1.0.0"
+	const want = "pkg:golang/github.com/Azure/azure-sdk-for-go@v1.0.0"
+
+	p, err := Parse(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := p.FullName(); got != "github.com/Azure/azure-sdk-for-go" {
+		t.Errorf("FullName() = %q, want %q", got, "github.com/Azure/azure-sdk-for-go")
+	}
+	if got := p.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
 	}
 }
 
@@ -137,6 +155,14 @@ func TestNew(t *testing.T) {
 			pkgName:   "Console",
 			version:   "6.1.7",
 			want:      "pkg:composer/symfony/console@6.1.7",
+		},
+		{
+			name:      "golang case-sensitive path",
+			purlType:  "golang",
+			namespace: "github.com/Azure",
+			pkgName:   "azure-sdk-for-go",
+			version:   "v1.0.0",
+			want:      "pkg:golang/github.com/Azure/azure-sdk-for-go@v1.0.0",
 		},
 	}
 

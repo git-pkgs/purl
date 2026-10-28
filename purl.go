@@ -7,6 +7,7 @@ package purl
 
 import (
 	"errors"
+	"net/url"
 	"sort"
 	"strings"
 
@@ -24,6 +25,13 @@ func Parse(s string) (*PURL, error) {
 	if err != nil {
 		return nil, err
 	}
+	if p.Type == ecosystemGolang {
+		namespace, name, err := originalGolangPath(s)
+		if err != nil {
+			return nil, err
+		}
+		preserveGolangCase(&p, namespace, name)
+	}
 	if p.Type == ecosystemGit {
 		if p.Namespace == "" {
 			return nil, errors.New("git purl requires a host and repository path")
@@ -35,6 +43,65 @@ func Parse(s string) (*PURL, error) {
 	}
 	lowercaseCaseInsensitive(&p)
 	return &PURL{p}, nil
+}
+
+// originalGolangPath extracts the decoded path components before
+// packageurl-go's normalization lowercases Go module paths. FromString has
+// already validated the full PURL; this only recovers the case-sensitive
+// namespace and name.
+func originalGolangPath(s string) (namespace, name string, err error) {
+	remainder := s[4:] // FromString has already validated the case-insensitive "pkg:" scheme.
+	for len(remainder) > 0 && remainder[0] == '/' {
+		remainder = remainder[1:]
+	}
+	typ, remainder, ok := strings.Cut(remainder, "/")
+	if !ok || !strings.EqualFold(typ, ecosystemGolang) {
+		return "", "", errors.New("could not recover golang PURL path")
+	}
+	if i := strings.IndexAny(remainder, "?#"); i >= 0 {
+		remainder = remainder[:i]
+	}
+	if i := strings.LastIndexByte(remainder, '@'); i > 0 {
+		remainder = remainder[:i]
+	}
+	nameStart := strings.LastIndexByte(remainder, '/')
+	if nameStart < 0 {
+		name, err = url.PathUnescape(remainder)
+		return "", name, err
+	}
+	name, err = url.PathUnescape(remainder[nameStart+1:])
+	if err != nil {
+		return "", "", err
+	}
+	if name == "" {
+		return "", "", errors.New("golang PURL is missing a name")
+	}
+
+	segments := strings.Split(remainder[:nameStart], "/")
+	decoded := make([]string, 0, len(segments))
+	for _, segment := range segments {
+		if segment == "" {
+			continue
+		}
+		segment, err = url.PathUnescape(segment)
+		if err != nil {
+			return "", "", err
+		}
+		decoded = append(decoded, segment)
+	}
+	namespace = strings.Join(decoded, "/")
+	return namespace, name, nil
+}
+
+// preserveGolangCase restores the case-sensitive path components after
+// packageurl-go's Normalize has lowercased them. Normalize only trims leading
+// and trailing slashes from the namespace, so retain that adjustment.
+func preserveGolangCase(p *packageurl.PackageURL, namespace, name string) {
+	if p.Type != ecosystemGolang {
+		return
+	}
+	p.Namespace = strings.Trim(namespace, "/")
+	p.Name = name
 }
 
 // lowercaseCaseInsensitive lowercases components the spec declares
@@ -70,6 +137,7 @@ func New(purlType, namespace, name, version string, qualifiers map[string]string
 	}
 	p := packageurl.NewPackageURL(purlType, namespace, name, version, q, "")
 	_ = p.Normalize()
+	preserveGolangCase(p, namespace, name)
 	lowercaseCaseInsensitive(p)
 	return &PURL{*p}
 }

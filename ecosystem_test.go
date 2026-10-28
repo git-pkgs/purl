@@ -201,6 +201,7 @@ func TestMakePURLString(t *testing.T) {
 		{"uppercase ecosystem", "NPM", "@scope/pkg", "", "pkg:npm/%40scope/pkg"},
 		{"golang namespace", "golang", "github.com/foo/bar", "v1.0.0", "pkg:golang/github.com/foo/bar@v1.0.0"},
 		{"go alias", "go", "github.com/user/repo", "v1.0.0", "pkg:golang/github.com/user/repo@v1.0.0"},
+		{"golang case-sensitive path", "golang", "github.com/Azure/azure-sdk-for-go", "v1.0.0", "pkg:golang/github.com/Azure/azure-sdk-for-go@v1.0.0"},
 		{"golang empty namespace segment", "golang", "github.com//foo/bar", "v1.0.0", "pkg:golang/github.com/foo/bar@v1.0.0"},
 		{"maven", "maven", "org.apache.commons:commons-lang3", "3.12.0", "pkg:maven/org.apache.commons/commons-lang3@3.12.0"},
 		{"maven escaping", "maven", "org example:artifact@name", "3.12.0", "pkg:maven/org%20example/artifact%40name@3.12.0"},
