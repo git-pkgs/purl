@@ -155,9 +155,7 @@ func PURLTypeToDepsdev(purlType string) string {
 //   - arch: pkg -> namespace="arch", name="pkg"
 //   - freebsd: pkg -> namespace="freebsd", name="pkg"
 //   - swift: host/owner/package -> namespace="host/owner", name="package"
-//
-// Swift registry identities do not contain source repository coordinates and
-// return nil because the Swift PURL type cannot represent them.
+//     or scope.package -> namespace="scope", name="package"
 func MakePURL(ecosystem, name, version string) *PURL {
 	purlType := EcosystemToPURLType(ecosystem)
 	namespace, pkgName, ok := splitNamespace(ecosystem, name)

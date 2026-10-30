@@ -1,6 +1,7 @@
 package purl
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -251,11 +252,54 @@ func TestMakePURLStringMatchesMakePURLOnNormalizeError(t *testing.T) {
 	}
 }
 
-func TestMakePURLRejectsSwiftRegistryIdentity(t *testing.T) {
+func TestSwiftRegistryPURLBuilders(t *testing.T) {
+	for _, tt := range []struct {
+		name, version, want string
+	}{
+		{"apple.swift-argument-parser", "1.8.2", "pkg:swift/apple/swift-argument-parser@1.8.2"},
+		{"mona.LinkedList", "3.1.4", "pkg:swift/mona/LinkedList@3.1.4"},
+		{"My-Scope2.My_Package", "", "pkg:swift/My-Scope2/My_Package"},
+		{"a.b", "1.0.0+build", "pkg:swift/a/b@1.0.0%2Bbuild"},
+		{strings.Repeat("a", 39) + "." + strings.Repeat("b", 100), "", "pkg:swift/" + strings.Repeat("a", 39) + "/" + strings.Repeat("b", 100)},
+		{"github.com/Apple/Swift-NIO", "2.0.0", "pkg:swift/github.com/Apple/Swift-NIO@2.0.0"},
+		{"git.example.com/group/subgroup/package", "1.0.0", "pkg:swift/git.example.com/group/subgroup/package@1.0.0"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			p := MakePURL("Swift", tt.name, tt.version)
+			if p == nil {
+				t.Fatal("MakePURL returned nil")
+			}
+			for builder, got := range map[string]string{
+				"MakePURL":        p.String(),
+				"MakePURLString":  MakePURLString("Swift", tt.name, tt.version),
+				"BuildPURLString": BuildPURLString("Swift", tt.name, tt.version, ""),
+			} {
+				if got != tt.want {
+					t.Errorf("%s = %q, want %q", builder, got, tt.want)
+				}
+			}
+			parsed, err := Parse(p.String())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if parsed.String() != tt.want {
+				t.Errorf("round trip = %q, want %q", parsed.String(), tt.want)
+			}
+		})
+	}
+}
+
+func TestMakePURLRejectsInvalidSwiftIdentity(t *testing.T) {
 	identities := []string{
-		"apple.swift-argument-parser",
+		"", "apple", ".package", "apple.", "apple.package.extra",
+		"bad_scope.package", "-apple.package", "apple-.package", "app--le.package",
+		"apple.-package", "apple.package_", "apple.pack__age", "apple.pack-_age",
+		"apple.package name", "apple.package@1", "apple.packagé",
 		"apple/swift-argument-parser",
 		"/apple/swift-argument-parser",
+		"github.com/apple/", "github.com//package",
+		strings.Repeat("a", 40) + ".package",
+		"apple." + strings.Repeat("a", 101),
 	}
 
 	for _, identity := range identities {
@@ -265,6 +309,9 @@ func TestMakePURLRejectsSwiftRegistryIdentity(t *testing.T) {
 			}
 			if got := MakePURLString("swift", identity, "1.8.2"); got != "" {
 				t.Errorf("MakePURLString(%q) = %q, want empty string", identity, got)
+			}
+			if got := BuildPURLString("swift", identity, "1.8.2", ""); got != "" {
+				t.Errorf("BuildPURLString(%q) = %q, want empty string", identity, got)
 			}
 		})
 	}
