@@ -27,6 +27,11 @@ func TestFullName(t *testing.T) {
 		{"pkg:golang/github.com/gorilla/mux@v1.8.0", "github.com/gorilla/mux"},
 		{"pkg:golang/google.golang.org/grpc@v1.50.0", "google.golang.org/grpc"},
 
+		{"pkg:swift/Mona/Linked-List@1.0.0", "Mona.Linked-List"},
+		{"pkg:swift/github.com/Apple/Swift-NIO@2.0.0", "github.com/Apple/Swift-NIO"},
+		{"pkg:swift/git.example.com/group/subgroup/package", "git.example.com/group/subgroup/package"},
+		{"pkg:swift/localhost/owner/package", "localhost/owner/package"},
+
 		// Terraform modules
 		{"pkg:terraform/hashicorp/consul/aws@0.11.0", "hashicorp/consul/aws"},
 
@@ -51,6 +56,21 @@ func TestFullName(t *testing.T) {
 			}
 			if got := p.FullName(); got != tt.want {
 				t.Errorf("FullName() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSwiftFullNameRoundTrip(t *testing.T) {
+	for _, name := range []string{"Mona.Linked-List", "My-Scope2.My_Package", "github.com/Apple/Swift-NIO"} {
+		t.Run(name, func(t *testing.T) {
+			input := BuildPURLString("swift", name, "1.0.0", "https://registry.example.com")
+			p, err := Parse(input)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := p.FullName(); got != name {
+				t.Errorf("FullName() = %q, want %q", got, name)
 			}
 		})
 	}
