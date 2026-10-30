@@ -1,11 +1,14 @@
 package purl
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/git-pkgs/vers"
 	packageurl "github.com/package-url/packageurl-go"
 )
+
+var swiftRegistryIdentity = regexp.MustCompile(`^[A-Za-z0-9]+(-[A-Za-z0-9]+)*\.[A-Za-z0-9]+([-_][A-Za-z0-9]+)*$`)
 
 // CleanVersion returns plain versions unchanged. For version constraints, it
 // uses the vers library to extract the lowest included version. If no included
@@ -239,18 +242,30 @@ func splitNamespace(ecosystem, name string) (namespace, pkgName string, ok bool)
 	case purlTypeVSCodeExtension:
 		return splitVSCodeExtension(name)
 	case ecosystemSwift:
-		i := strings.LastIndexByte(name, '/')
-		if i <= 0 || i == len(name)-1 {
-			return "", "", false
-		}
-		namespace = name[:i]
-		ownerSeparator := strings.IndexByte(namespace, '/')
-		if ownerSeparator <= 0 || ownerSeparator == len(namespace)-1 || strings.Contains(namespace, "//") {
-			return "", "", false
-		}
-		pkgName = name[i+1:]
+		return splitSwift(name)
 	}
 	return
+}
+
+func splitSwift(name string) (namespace, pkgName string, ok bool) {
+	const maxScopeLength, maxNameLength = 39, 100
+	i := strings.LastIndexByte(name, '/')
+	if i < 0 {
+		namespace, pkgName, ok = strings.Cut(name, ".")
+		if !ok || len(namespace) > maxScopeLength || len(pkgName) > maxNameLength || !swiftRegistryIdentity.MatchString(name) {
+			return "", "", false
+		}
+		return namespace, pkgName, true
+	}
+	if i == 0 || i == len(name)-1 {
+		return "", "", false
+	}
+	namespace = name[:i]
+	ownerSeparator := strings.IndexByte(namespace, '/')
+	if ownerSeparator <= 0 || ownerSeparator == len(namespace)-1 || strings.Contains(namespace, "//") {
+		return "", "", false
+	}
+	return namespace, name[i+1:], true
 }
 
 // splitVSCodeExtension splits VS Code's publisher.name extension identifier.

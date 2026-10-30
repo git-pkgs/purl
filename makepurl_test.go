@@ -92,7 +92,7 @@ func TestBuildPURLString(t *testing.T) {
 		{"helm file path", "helm", "local-chart", "0.1.0", "file://../local-chart", "pkg:helm/local-chart@0.1.0"},
 		{"helm no repo", "helm", "common", "", "", "pkg:helm/common"},
 		{"swift source coordinate", "swift", "github.com/apple/swift-argument-parser", "1.8.2", "", "pkg:swift/github.com/apple/swift-argument-parser@1.8.2"},
-		{"swift registry identity", "swift", "apple.swift-argument-parser", "1.8.2", "", ""},
+		{"swift registry identity", "swift", "apple.swift-argument-parser", "1.8.2", "", "pkg:swift/apple/swift-argument-parser@1.8.2"},
 		{"swift registry path", "swift", "apple/swift-argument-parser", "1.8.2", "", ""},
 		{"swift registry URL path", "swift", "/apple/swift-argument-parser", "1.8.2", "", ""},
 	}
