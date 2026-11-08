@@ -20,6 +20,7 @@ func TestNormalizeEcosystem(t *testing.T) {
 		{"composer", "packagist"},
 		{"packagist", "packagist"},
 		{"cargo", "cargo"},
+		{"crates.io", "cargo"},
 		{"unknown", "unknown"},
 	}
 
@@ -29,6 +30,14 @@ func TestNormalizeEcosystem(t *testing.T) {
 				t.Errorf("NormalizeEcosystem(%q) = %q, want %q", tt.ecosystem, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestNormalizeEcosystemAcceptsOSVNames(t *testing.T) {
+	for purlType, osv := range osvEcosystemNames {
+		if got, want := NormalizeEcosystem(osv), NormalizeEcosystem(PURLTypeToEcosystem(purlType)); got != want {
+			t.Errorf("NormalizeEcosystem(%q) = %q, want %q", osv, got, want)
+		}
 	}
 }
 

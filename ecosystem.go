@@ -39,6 +39,11 @@ var ecosystemAliases = map[string]string{
 	"go":              ecosystemGolang,
 	purlTypeGem:       ecosystemRubyGems,
 	ecosystemComposer: ecosystemPackagist,
+	// OSV names that do not lowercase to the ecosystem name.
+	"crates.io":      "cargo",
+	"conancenter":    "conan",
+	"swifturl":       ecosystemSwift,
+	"github actions": ecosystemGitHubActions,
 }
 
 // osvEcosystemNames maps PURL types to OSV ecosystem names.
