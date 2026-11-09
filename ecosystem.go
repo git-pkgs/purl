@@ -36,9 +36,10 @@ var purlTypeForEcosystem = map[string]string{
 
 // ecosystemAliases maps alternate names to canonical ecosystem names.
 var ecosystemAliases = map[string]string{
-	"go":              ecosystemGolang,
-	purlTypeGem:       ecosystemRubyGems,
-	ecosystemComposer: ecosystemPackagist,
+	"go":                  ecosystemGolang,
+	purlTypeGem:           ecosystemRubyGems,
+	ecosystemComposer:     ecosystemPackagist,
+	purlTypeGitHubActions: ecosystemGitHubActions,
 	// OSV names that do not lowercase to the ecosystem name.
 	"crates.io":      "cargo",
 	"conancenter":    "conan",

@@ -35,8 +35,11 @@ func TestNormalizeEcosystem(t *testing.T) {
 
 func TestNormalizeEcosystemAcceptsOSVNames(t *testing.T) {
 	for purlType, osv := range osvEcosystemNames {
-		if got, want := NormalizeEcosystem(osv), NormalizeEcosystem(PURLTypeToEcosystem(purlType)); got != want {
-			t.Errorf("NormalizeEcosystem(%q) = %q, want %q", osv, got, want)
+		want := NormalizeEcosystem(PURLTypeToEcosystem(purlType))
+		for _, name := range []string{osv, purlType} {
+			if got := NormalizeEcosystem(name); got != want {
+				t.Errorf("NormalizeEcosystem(%q) = %q, want %q", name, got, want)
+			}
 		}
 	}
 }
