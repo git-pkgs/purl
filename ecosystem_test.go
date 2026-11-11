@@ -20,6 +20,7 @@ func TestNormalizeEcosystem(t *testing.T) {
 		{"composer", "packagist"},
 		{"packagist", "packagist"},
 		{"cargo", "cargo"},
+		{"crates.io", "cargo"},
 		{"unknown", "unknown"},
 	}
 
@@ -29,6 +30,17 @@ func TestNormalizeEcosystem(t *testing.T) {
 				t.Errorf("NormalizeEcosystem(%q) = %q, want %q", tt.ecosystem, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestNormalizeEcosystemAcceptsOSVNames(t *testing.T) {
+	for purlType, osv := range osvEcosystemNames {
+		want := NormalizeEcosystem(PURLTypeToEcosystem(purlType))
+		for _, name := range []string{osv, purlType} {
+			if got := NormalizeEcosystem(name); got != want {
+				t.Errorf("NormalizeEcosystem(%q) = %q, want %q", name, got, want)
+			}
+		}
 	}
 }
 
@@ -217,6 +229,11 @@ func TestMakePURLString(t *testing.T) {
 		{"freebsd default namespace", "freebsd", "py311-requests", "2.32.3_1", "pkg:bsd/freebsd/py311-requests@2.32.3_1"},
 		{"github-actions", "github-actions", "actions/checkout", "v4", "pkg:githubactions/actions/checkout@v4"},
 		{"github-actions path", "github-actions", "actions/cache/restore", "v4", "pkg:githubactions/actions/cache@v4"},
+		{"githubactions path", "githubactions", "actions/cache/restore", "v4", "pkg:githubactions/actions/cache@v4"},
+		{"OSV GitHub Actions", "GitHub Actions", "actions/checkout", "v4", "pkg:githubactions/actions/checkout@v4"},
+		{"OSV crates.io", "crates.io", "serde", "1.0.0", "pkg:cargo/serde@1.0.0"},
+		{"OSV ConanCenter", "ConanCenter", "zlib", "1.3.1", "pkg:conan/zlib@1.3.1"},
+		{"OSV SwiftURL", "SwiftURL", "github.com/apple/swift-nio", "2.65.0", "pkg:swift/github.com/apple/swift-nio@2.65.0"},
 		{"cargo", "cargo", "serde", "1.0.0", "pkg:cargo/serde@1.0.0"},
 		{"generic ecosystem escaping", "cargo", "serde+derive", "1.0.0", "pkg:cargo/serde%2Bderive@1.0.0"},
 		{"swift source coordinate", "swift", "github.com/apple/swift-argument-parser", "1.8.2", "pkg:swift/github.com/apple/swift-argument-parser@1.8.2"},
@@ -302,18 +319,20 @@ func TestMakePURLRejectsInvalidSwiftIdentity(t *testing.T) {
 		"apple." + strings.Repeat("a", 101),
 	}
 
-	for _, identity := range identities {
-		t.Run(identity, func(t *testing.T) {
-			if got := MakePURL("swift", identity, "1.8.2"); got != nil {
-				t.Errorf("MakePURL(%q) = %q, want nil", identity, got.String())
-			}
-			if got := MakePURLString("swift", identity, "1.8.2"); got != "" {
-				t.Errorf("MakePURLString(%q) = %q, want empty string", identity, got)
-			}
-			if got := BuildPURLString("swift", identity, "1.8.2", ""); got != "" {
-				t.Errorf("BuildPURLString(%q) = %q, want empty string", identity, got)
-			}
-		})
+	for _, ecosystem := range []string{"swift", "SwiftURL"} {
+		for _, identity := range identities {
+			t.Run(ecosystem+"/"+identity, func(t *testing.T) {
+				if got := MakePURL(ecosystem, identity, "1.8.2"); got != nil {
+					t.Errorf("MakePURL(%q) = %q, want nil", identity, got.String())
+				}
+				if got := MakePURLString(ecosystem, identity, "1.8.2"); got != "" {
+					t.Errorf("MakePURLString(%q) = %q, want empty string", identity, got)
+				}
+				if got := BuildPURLString(ecosystem, identity, "1.8.2", ""); got != "" {
+					t.Errorf("BuildPURLString(%q) = %q, want empty string", identity, got)
+				}
+			})
+		}
 	}
 }
 
