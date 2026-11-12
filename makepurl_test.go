@@ -103,6 +103,10 @@ func TestBuildPURLString(t *testing.T) {
 		{"terraform without namespace", "terraform", "random", "3.6.0", "", ""},
 		{"terraform empty name", "terraform", "hashicorp/", "3.6.0", "", ""},
 		{"terraform empty namespace", "terraform", "/random", "3.6.0", "", ""},
+		{"terraform slash-only namespace", "terraform", "//random", "3.6.0", "", ""},
+		{"terraform leading slash", "terraform", "/hashicorp/random", "3.6.0", "", ""},
+		{"terraform empty segment", "terraform", "hashicorp//random", "3.6.0", "", ""},
+		{"terraform module empty segment", "terraform", "hashicorp/consul//aws", "0.11.0", "", ""},
 	}
 
 	for _, tt := range tests {

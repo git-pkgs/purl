@@ -273,10 +273,11 @@ func splitSwift(name string) (namespace, pkgName string, ok bool) {
 // splitVSCodeExtension splits VS Code's publisher.name extension identifier.
 // splitTerraform splits a Terraform address without its registry hostname:
 // namespace/type for a provider, namespace/name/system for a module, whose
-// namespace is then namespace/name. The type requires a namespace.
+// namespace is then namespace/name. The type requires a namespace, so an
+// address without one, or with an empty segment, is rejected.
 func splitTerraform(name string) (namespace, pkgName string, ok bool) {
 	i := strings.LastIndexByte(name, '/')
-	if i <= 0 || i == len(name)-1 {
+	if i <= 0 || i == len(name)-1 || name[0] == '/' || strings.Contains(name, "//") {
 		return "", "", false
 	}
 	return name[:i], name[i+1:], true
