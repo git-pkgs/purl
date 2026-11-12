@@ -95,6 +95,18 @@ func TestBuildPURLString(t *testing.T) {
 		{"swift registry identity", "swift", "apple.swift-argument-parser", "1.8.2", "", "pkg:swift/apple/swift-argument-parser@1.8.2"},
 		{"swift registry path", "swift", "apple/swift-argument-parser", "1.8.2", "", ""},
 		{"swift registry URL path", "swift", "/apple/swift-argument-parser", "1.8.2", "", ""},
+		{"terraform provider", "terraform", "hashicorp/random", "3.6.0", "", "pkg:terraform/hashicorp/random@3.6.0"},
+		{"terraform module", "terraform", "hashicorp/consul/aws", "0.11.0", "", "pkg:terraform/hashicorp/consul/aws@0.11.0"},
+		{"terraform case-sensitive", "terraform", "HashiCorp/Random", "3.6.0", "", "pkg:terraform/HashiCorp/Random@3.6.0"},
+		{"terraform default registry ignored", "terraform", "hashicorp/random", "3.6.0", "https://registry.terraform.io", "pkg:terraform/hashicorp/random@3.6.0"},
+		{"terraform other registry", "terraform", "hashicorp/random", "3.6.0", "https://registry.opentofu.org", "pkg:terraform/hashicorp/random@3.6.0?repository_url=https:%2F%2Fregistry.opentofu.org"},
+		{"terraform without namespace", "terraform", "random", "3.6.0", "", ""},
+		{"terraform empty name", "terraform", "hashicorp/", "3.6.0", "", ""},
+		{"terraform empty namespace", "terraform", "/random", "3.6.0", "", ""},
+		{"terraform slash-only namespace", "terraform", "//random", "3.6.0", "", ""},
+		{"terraform leading slash", "terraform", "/hashicorp/random", "3.6.0", "", ""},
+		{"terraform empty segment", "terraform", "hashicorp//random", "3.6.0", "", ""},
+		{"terraform module empty segment", "terraform", "hashicorp/consul//aws", "0.11.0", "", ""},
 	}
 
 	for _, tt := range tests {
@@ -126,6 +138,9 @@ func TestBuildPURLStringMatchesMakePURL(t *testing.T) {
 		{"npm", "lodash", "^1.0.0", ""},
 		{"npm", "pkg", "1.0.0", "https://custom.registry.com"},
 		{"swift", "github.com/apple/swift-argument-parser", "1.8.2", ""},
+		{"terraform", "hashicorp/random", "3.6.0", ""},
+		{"terraform", "hashicorp/consul/aws", "0.11.0", ""},
+		{"terraform", "hashicorp/random", "3.6.0", "https://registry.opentofu.org"},
 	}
 
 	for _, tt := range cases {

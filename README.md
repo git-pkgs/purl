@@ -65,7 +65,7 @@ output stays stable for callers that store it:
 
 Type information is embedded in `types.json`. Type names and namespace requirements are checked against the pinned [purl-spec](https://github.com/package-url/purl-spec) submodule. Default registries and URL templates are maintained locally.
 
-The local types `bioconductor`, `clojars`, `deno`, and `elm` are retained. `bsd` follows the FreeBSD type proposed in [purl-spec#496](https://github.com/package-url/purl-spec/pull/496); the `freebsd` ecosystem maps to `pkg:bsd/freebsd/...`. The legacy `homebrew` type keeps its existing PURLs and registry behavior; use `brew` explicitly for the registered type. Recognition of a type does not imply full support for its normalization or validation rules.
+The local types `bioconductor`, `clojars`, `deno`, and `elm` are retained. `bsd` follows the FreeBSD type proposed in [purl-spec#496](https://github.com/package-url/purl-spec/pull/496); the `freebsd` ecosystem maps to `pkg:bsd/freebsd/...`. `terraform` follows the type proposed in [purl-spec#889](https://github.com/package-url/purl-spec/pull/889): a provider address `namespace/type` maps to `pkg:terraform/{namespace}/{type}`, a module address `namespace/name/system` to `pkg:terraform/{namespace}/{name}/{system}`, and the default registry is `https://registry.terraform.io`. The legacy `homebrew` type keeps its existing PURLs and registry behavior; use `brew` explicitly for the registered type. Recognition of a type does not imply full support for its normalization or validation rules.
 
 ```go
 purl.KnownTypes()           // []string of all known PURL types
