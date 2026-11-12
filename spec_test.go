@@ -33,6 +33,7 @@ func TestSpecTypeMetadata(t *testing.T) {
 		"deno":         "Deno registry support",
 		"elm":          "Elm registry support",
 		"homebrew":     "Legacy type retained alongside brew for compatibility",
+		"terraform":    "Terraform providers and modules, proposed in purl-spec#889",
 	}
 	for _, name := range purl.KnownTypes() {
 		if !registered[name] && localTypes[name] == "" {

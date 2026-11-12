@@ -585,6 +585,15 @@
         }
       }
     },
+    "terraform": {
+      "description": "Terraform providers and modules, proposed in purl-spec#889",
+      "default_registry": "https://registry.terraform.io",
+      "namespace_requirement": "required",
+      "examples": [
+        "pkg:terraform/hashicorp/aws@6.0.0",
+        "pkg:terraform/terraform-aws-modules/vpc@6.0.1"
+      ]
+    },
     "vcpkg": {
       "description": "Packages from the vcpkg C/C++ package manager.",
       "default_registry": null,
