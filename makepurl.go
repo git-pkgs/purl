@@ -271,24 +271,34 @@ func splitSwift(name string) (namespace, pkgName string, ok bool) {
 }
 
 // splitVSCodeExtension splits VS Code's publisher.name extension identifier.
-// splitTerraform splits a Terraform address without its registry hostname:
-// namespace/type for a provider, namespace/name/system for a module, whose
-// namespace is then namespace/name. The type requires a namespace, so an
-// address without one, or with an empty segment, is rejected.
-func splitTerraform(name string) (namespace, pkgName string, ok bool) {
-	i := strings.LastIndexByte(name, '/')
-	if i <= 0 || i == len(name)-1 || name[0] == '/' || strings.Contains(name, "//") {
-		return "", "", false
-	}
-	return name[:i], name[i+1:], true
-}
-
 func splitVSCodeExtension(name string) (publisher, extension string, ok bool) {
 	publisher, extension, ok = strings.Cut(name, ".")
 	if !ok || publisher == "" || extension == "" {
 		return "", "", false
 	}
 	return publisher, extension, true
+}
+
+// splitTerraform splits a Terraform address without its registry hostname:
+// namespace/type for a provider, namespace/name/system for a module, whose
+// namespace is then namespace/name.
+func splitTerraform(name string) (namespace, pkgName string, ok bool) {
+	const providerSegments, moduleSegments = 2, 3
+	segments := strings.Split(name, "/")
+	if len(segments) < providerSegments || len(segments) > moduleSegments {
+		return "", "", false
+	}
+	for _, segment := range segments {
+		if segment == "" {
+			return "", "", false
+		}
+	}
+	// Terraform allows no dot in a namespace, so one marks a hostname.
+	if strings.Contains(segments[0], ".") {
+		return "", "", false
+	}
+	i := strings.LastIndexByte(name, '/')
+	return name[:i], name[i+1:], true
 }
 
 // writeComponentEscaped writes s to b, percent-encoding characters that are not safe

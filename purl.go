@@ -113,6 +113,13 @@ func lowercaseCaseInsensitive(p *packageurl.PackageURL) {
 		p.Name = strings.ToLower(p.Name)
 	case purlTypeBSD:
 		p.Namespace = strings.ToLower(p.Namespace)
+	case purlTypeTerraform:
+		// Terraform folds a provider's namespace and type, and keeps a
+		// module's (namespace/name/system) as given.
+		if !strings.Contains(p.Namespace, "/") {
+			p.Namespace = strings.ToLower(p.Namespace)
+			p.Name = strings.ToLower(p.Name)
+		}
 	}
 }
 
