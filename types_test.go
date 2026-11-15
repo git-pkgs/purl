@@ -81,6 +81,7 @@ func TestIsKnownType(t *testing.T) {
 		{"npm", true},
 		{"pypi", true},
 		{"cargo", true},
+		{"terraform", true},
 		{"unknown-type", false},
 		{"", false},
 	}
@@ -102,6 +103,7 @@ func TestDefaultRegistry(t *testing.T) {
 		{"npm", "https://registry.npmjs.org"},
 		{"pypi", "https://pypi.org"},
 		{"cargo", "https://crates.io"},
+		{"terraform", "https://registry.terraform.io"},
 		{"apk", ""}, // no default registry
 		{"deb", ""}, // no default registry
 		{"unknown", ""},
@@ -128,6 +130,7 @@ func TestNamespaceRequirement(t *testing.T) {
 		{"cran", false, true},
 		{"npm", false, false}, // optional
 		{"cargo", false, true},
+		{"terraform", true, false},
 	}
 
 	for _, tt := range tests {
